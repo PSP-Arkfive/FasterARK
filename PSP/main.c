@@ -33,50 +33,7 @@ char* curtext = NULL;
 Image* background;
 Image* icon;
 
-int kthread(SceSize args, void *argp){
-
-    curtext = "Finished!";
-
-    sceKernelDelayThread(10000000);
-
-    working = 0;
-
-    return 0;
-}
-
-
-void doKernelThread(){
-    SceUID kthreadID = k_tbl->KernelCreateThread("arkflasher", (void*)KERNELIFY(&kthread), 1, 0x20000, PSP_THREAD_ATTR_VFPU, NULL);
-    if (kthreadID >= 0){
-        // start thread and wait for it to end
-        k_tbl->KernelStartThread(kthreadID, 0, NULL);
-    }
-}
-
-void kmain(){
-    int k1 = pspSdkSetK1(0);
-    curtext = "Got Kernel Access!";
-    pspXploitScanKernelFunctions(k_tbl);
-    pspXploitRepairKernel();
-    doKernelThread();
-    curtext = "All Done!";
-    pspSdkSetK1(k1);
-}
-
-void flip(){
-    sceGuFinish();
-    sceGuSync(0,0);
-    guStart();
-    sceGuTexMode(GU_PSM_8888, 0, 0, 0);
-    sceGuTexFunc(GU_TFX_REPLACE, GU_TCC_RGBA);
-    sceGuTexFilter(GU_NEAREST, GU_NEAREST);
-    sceGuFinish();
-    sceGuSync(0,0); 
-
-    sceDisplayWaitVblankStart(); 
-    flipScreen();
-    sceKernelDcacheWritebackInvalidateAll();
-};
+extern void kmain();
 
 int drawthread(SceSize args, void *argp){
     

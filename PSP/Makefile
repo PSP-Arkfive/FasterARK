@@ -1,5 +1,5 @@
 TARGET = fasterark
-OBJS = main.o
+OBJS = main.o kernel.o
 
 UNAME := $(shell uname)
 
