@@ -88,7 +88,7 @@ int main(int argc, char** argv){
         res = pspXploitDoKernelExploit();
         
         if (res == 0){
-            pspXploitExecuteKernel((u32)kmain);
+            pspXploitExecuteKernel(kmain);
         }
         else {
             curtext = "ERROR executing kernel exploit";
