@@ -18,11 +18,20 @@ extern char* curtext;
 extern KernelFunctions* k_tbl;
 SceModule* loadexec = NULL;
 
+ARKConfig arkconf = {
+    .magic = ARK_CONFIG_MAGIC,
+    .arkpath = "ms0:/PSP/SAVEDATA/ARK_01234/", // default path for ARK files
+    .exploit_id = "Live",
+    .launcher = {0},
+    .exec_mode = PSP_ORIG, // run ARK in PSP mode
+    .recovery = 0,
+};
+
 
 int isVitaFile(char* filename){
-    return (strstr(filename, "psv")!=NULL // PS Vita btcnf replacement, not used on PSP
-            || strstr(filename, "660")!=NULL // PSP 6.60 modules can be used on Vita, not needed for PSP
-            || strstr(filename, "vita")!=NULL // Vita modules
+    return  (  strstr(filename, "psv")  != NULL // PS Vita btcnf replacement, not used on PSP
+            || strstr(filename, "660")  != NULL // PSP 6.60 modules can be used on Vita, not needed for PSP
+            || strstr(filename, "vita") != NULL // Vita modules
     );
 }
 
@@ -123,7 +132,6 @@ void copyLibraryFiles(){
 
 int LoadReboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
 {
-
     // Copy Rebootex into Memory
     memset((char *)REBOOTEX_TEXT, 0, REBOOTEX_MAX_SIZE);
     if (rebootbuffer_psp[0] == 0x1F && rebootbuffer_psp[1] == 0x8B) // gzip packed rebootex
@@ -135,6 +143,7 @@ int LoadReboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
     RebootConfigARK* conf = (RebootConfigARK*)(REBOOTEX_CONFIG);
     memset((char *)REBOOTEX_CONFIG, 0, sizeof(RebootConfigARK));
     conf->magic = ARK_CONFIG_MAGIC;
+    memcpy((void*)ARK_CONFIG, &arkconf, sizeof(ARKConfig));
     
     // Load Sony Reboot Buffer
     int (*sceLoadReboot)(void *, unsigned int, void *, unsigned int) = (void*)loadexec->text_addr;
