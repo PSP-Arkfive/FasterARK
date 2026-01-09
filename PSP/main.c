@@ -7,7 +7,7 @@
 #include <libpspexploit.h>
 #include <mini2d.h>
 
-PSP_MODULE_INFO("Flash Dumper", PSP_MODULE_USER, 1, 0);
+PSP_MODULE_INFO("FasterARK PSP", PSP_MODULE_USER, 1, 0);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER | PSP_THREAD_ATTR_VFPU);
 
 static KernelFunctions _ktbl;
@@ -41,10 +41,12 @@ int drawthread(SceSize args, void *argp){
         clearScreen(CLEAR_COLOR);
         
         blitAlphaImageToScreen(0, 0, 480, 272, background, 0, 0);
-        blitAlphaImageToScreen(0, 0, 80, 80, icon, 0, 0);
+        blitAlphaImageToScreen(0, 0, icon->imageWidth, icon->imageHeight, icon, 0, 272-icon->imageHeight);
 
-        if (curtext)
+        if (curtext){
+            fillScreenRect(0x8000ff00, 100, 100, 8*strlen(curtext), 8);
             printTextScreen(100, 100, curtext, WHITE_COLOR);
+        }
 
         flipScreen();
     }
