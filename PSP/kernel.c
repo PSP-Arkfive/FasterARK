@@ -2,7 +2,7 @@
 
 #include <ark.h>
 #include <bootloadex.h>
-#include <rebootconfig.h>
+#include <rebootexconfig.h>
 #include <libpspexploit.h>
 
 #include "payload.h"
@@ -140,8 +140,8 @@ int LoadReboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
         memcpy((void*)REBOOTEX_TEXT, rebootbuffer_psp, REBOOTEX_MAX_SIZE);
         
     // Build Configuration
-    RebootConfigARK* conf = (RebootConfigARK*)(REBOOTEX_CONFIG);
-    memset((char *)REBOOTEX_CONFIG, 0, sizeof(RebootConfigARK));
+    RebootexConfigARK* conf = (RebootexConfigARK*)(REBOOTEX_CONFIG);
+    memset((char *)REBOOTEX_CONFIG, 0, sizeof(RebootexConfigARK));
     conf->magic = ARK_CONFIG_MAGIC;
     memcpy((void*)ARK_CONFIG, &arkconf, sizeof(ARKConfig));
     
