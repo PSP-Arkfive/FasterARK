@@ -1,6 +1,6 @@
 #include <pspsdk.h>
 
-#include <ark.h>
+#include <systemctrl_ark.h>
 #include <bootloadex.h>
 #include <rebootexconfig.h>
 #include <libpspexploit.h>

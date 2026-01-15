@@ -2,7 +2,7 @@
 #include <pspdisplay.h>
 #include <pspgu.h>
 
-#include <ark.h>
+#include <systemctrl_ark.h>
 #include <rebootexconfig.h>
 #include <libpspexploit.h>
 #include <mini2d.h>
