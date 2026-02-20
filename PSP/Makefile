@@ -18,5 +18,16 @@ PSP_EBOOT_PIC1 = res/pic1.png
 LIBDIR = 
 LIBS = -lpspexploit -lpsprtc -lmini2d -lpng -lz -lpspgu -lpspgum
 
+all: $(EXTRA_TARGETS)
+	mkdir -p dist/PSP/GAME/FasterARK/
+	mkdir -p dist/PSP/SAVEDATA/
+	cp -r res/ARK_01234 dist/PSP/SAVEDATA/
+	cp -r res/LIBS dist/PSP/
+	cp EBOOT.PBP dist/PSP/GAME/FasterARK/
+	cd dist && zip -r FasterARK_psp.zip * && cd ..
+
+distclean: clean
+	rm -rf dist
+
 PSPSDK = $(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak
