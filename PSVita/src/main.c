@@ -58,10 +58,11 @@ int main(int argc, const char *argv[]) {
     int selection = 0;
     const char *options[] = {
         "Install ARK-4, ARK-X and Analog Plugin",
-        "Install Only ARK-4 (No Plugins)",
+        "Install ARK-4 Only (No Plugins)",
         "Install ARK-4 and Analog Plugin",
-        "Install Only ARK-X",
-        "Install Only Analog Plugin",
+        "Install ARK-X Only",
+        "Install Analog Plugin Only",
+        "Install Savedata Only",
         "Exit"
     };
     int num_options = sizeof(options) / sizeof(options[0]);
@@ -109,7 +110,7 @@ int main(int argc, const char *argv[]) {
             doInstall();
 
             {
-                const char *launch_options[] = { "Launch ARK-4", "Launch ARK-X" };
+                const char *launch_options[] = { "Launch ARK-4", "Launch ARK-X", "Exit" };
                 int launch_sel = 0;
                 int launch_num = sizeof(launch_options) / sizeof(launch_options[0]);
 
@@ -154,9 +155,12 @@ int main(int argc, const char *argv[]) {
                     sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=NPUZ01234"); // ARK-4
                     sceKernelDelayThread(1000 * 1000);
                     sceKernelExitProcess(0);
-                } else {
+                } else if (launch_sel == 1){
                     sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=SCPS10084"); // ARK-X
                     sceKernelDelayThread(1000 * 1000);
+                    sceKernelExitProcess(0);
+                }
+                else {
                     sceKernelExitProcess(0);
                 }
             }
@@ -191,11 +195,17 @@ int main(int argc, const char *argv[]) {
             break;
 
         case 5:
+            displayMsg("Installing Savedata Folder", "Installing Savedata Folder...");
+            copySaveFiles();
+            taiReloadConfig();
+            break;
+
+        default:
             displayMsg("Exit", "Exiting application...");
             return 0;
     }
 
-    if (selection == 3) {
+    if (selection == 4 || selection == 5) {
         // For "Install Only Analog Plugin", don't launch since ARK-4 may not be installed
         vita2d_start_drawing();
         vita2d_clear_screen();
@@ -215,7 +225,7 @@ int main(int argc, const char *argv[]) {
         } else if (selection == 2) {
             launch_opts[0] = "Launch ARK-4";
             num_launch = 1;
-        } else if (selection == 4) {
+        } else if (selection == 3) {
             launch_opts[0] = "Launch ARK-X";
             num_launch = 1;
         }
@@ -257,10 +267,10 @@ int main(int argc, const char *argv[]) {
         if (num_launch == 1) {
             if (selection == 1 || selection == 2) {
                 sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=NPUZ01234"); // ARK-4
-            } else { // selection == 4
+            } else if (selection == 3) {
                 sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=SCPS10084"); // ARK-X
             }
-        } else { // num_launch == 2
+        } else if (num_launch == 2) {
             if (launch_sel == 0) {
                 sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=NPUZ01234"); // ARK-4
             } else {
