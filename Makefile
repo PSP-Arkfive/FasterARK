@@ -5,6 +5,7 @@ all:
 	mkdir -p dist/PSP/SAVEDATA/
 	cp -r PSP/res/ARK_01234 dist/PSP/SAVEDATA/
 	cp -r PSP/res/LIBS dist/PSP/
+	cp -r PSP/res/CustomIPL dist/PSP/GAME/
 	cp PSP/EBOOT.PBP dist/PSP/GAME/FasterARK/
 	cd dist && zip -m -r FasterARK_psp.zip * && cd ..
 #	PS Vita
