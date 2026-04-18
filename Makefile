@@ -5,12 +5,12 @@ all:
 	mkdir -p dist/tmp/PSP/SAVEDATA/
 	cp -r PSP/res/ARK_01234 dist/tmp/PSP/SAVEDATA/
 	cp -r PSP/res/CustomIPL dist/tmp/PSP/GAME/
-	cp -r PSP/res/LIBS/ipl_update.prx dist/tmp/PSP/GAME/CustomIPL/
-	cp -r PSP/res/LIBS/kbooti_update.prx dist/tmp/PSP/GAME/CustomIPL/
-	cp -r PSP/res/LIBS/kpspident.prx dist/tmp/PSP/GAME/CustomIPL/
 	cp PSP/EBOOT.PBP dist/tmp/PSP/GAME/FasterARK/
-	cp -r PSP/res/LIBS/usbdevice.prx dist/tmp/PSP/GAME/FasterARK/
-	cp -r PSP/res/LIBS/idsregeneration.prx dist/tmp/PSP/GAME/FasterARK/
+	cp PSP/res/LIBS/ipl_update.prx dist/tmp/PSP/GAME/CustomIPL/
+	cp PSP/res/LIBS/kbooti_update.prx dist/tmp/PSP/GAME/CustomIPL/
+	cp PSP/res/LIBS/kpspident.prx dist/tmp/PSP/GAME/CustomIPL/
+	cp PSP/res/LIBS/usbdevice.prx dist/tmp/PSP/GAME/FasterARK/
+	cp PSP/res/LIBS/idsregeneration.prx dist/tmp/PSP/GAME/FasterARK/
 	cd dist/tmp/ && zip -m -r FasterARK_psp_lite.zip * && cd ../../ && mv dist/tmp/FasterARK_psp_lite.zip dist/
 #	PSP Full Install
 	mkdir -p dist/tmp/PSP/GAME/FasterARK/
