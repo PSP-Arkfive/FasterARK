@@ -20,6 +20,7 @@ all:
 	cp -r PSP/res/CustomIPL dist/tmp/PSP/GAME/
 	cp -r PSP/res/DC10 dist/tmp/PSP/GAME/
 	cp -r PSP/res/ARK150Addon660 dist/tmp/PSP/GAME/
+	cp -r PSP/res/OC_Tester dist/tmp/PSP/GAME/
 	cp PSP/EBOOT.PBP dist/tmp/PSP/GAME/FasterARK/
 	cp PSP/res/LIBS/usbdevice.prx dist/tmp/PSP/GAME/FasterARK/
 	cp PSP/res/LIBS/idsregeneration.prx dist/tmp/PSP/GAME/FasterARK/
