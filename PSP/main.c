@@ -39,7 +39,6 @@ struct ya2d_texture* background;
 struct ya2d_texture* icon;
 
 extern void kmain();
-extern u8 msx[];
 
 int drawthread(SceSize args, void *argp){
     
