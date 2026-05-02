@@ -120,6 +120,12 @@ void extractFlash0Archive(char* archive, char* dest_path){
 }
 
 void copyLibraryFiles(){
+
+    char vshmenu[ARK_PATH_SIZE];
+    strcpy(vshmenu, arkconf.arkpath);
+    strcat(vshmenu, VSH_MENU);
+    CopyFile(vshmenu, VSH_MENU_FLASH);
+
     if (CopyFile("usbdevice.prx", "flash0:/kd/usbdevice.prx") < 0
             && CopyFile("ms0:/PSP/LIBS/usbdevice.prx", "flash0:/kd/usbdevice.prx") < 0){
         curtext = "ERROR copying usbdevice.prx";
