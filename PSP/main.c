@@ -52,11 +52,12 @@ int drawthread(SceSize args, void *argp){
 
         if (curtext){
             ya2d_draw_rect(100, 100, 8*strlen(curtext), 8, 0x8000ff00, 1);
-            tinyFontPrintText((void*)(0x40000000 | 0x04000000), msx, 100, 100, curtext, WHITE_COLOR, NULL);
+            tinyFontPrintTextScreen(msx, 100, 100, curtext, WHITE_COLOR, NULL);
         }
 
         ya2d_finish_drawing();
         ya2d_swapbuffers();
+        tinyFontSwapBuffers();
     }
 
     return 0;
@@ -71,6 +72,7 @@ void loadGraphics(int argc, char** argv){
     sceIoClose(fd);
     
     ya2d_init();
+    ya2d_set_vsync(1);
     background = ya2d_load_PNG_file_offset(argv[0], YA2D_PLACE_VRAM, header.pic1_offset);
     icon = ya2d_load_PNG_file_offset(argv[0], YA2D_PLACE_VRAM, header.icon0_offset);
 
