@@ -5,13 +5,17 @@
 #include <systemctrl_ark.h>
 #include <rebootexconfig.h>
 #include <libpspexploit.h>
-#include <mini2d.h>
+#include <ya2d.h>
+#include <tinyfont.h>
 
 PSP_MODULE_INFO("FasterARK PSP", PSP_MODULE_USER, 1, 0);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER | PSP_THREAD_ATTR_VFPU);
 
 static KernelFunctions _ktbl;
 KernelFunctions* k_tbl = &_ktbl;
+
+#define CLEAR_COLOR 0x00000000
+#define WHITE_COLOR 0xFFFFFFFF
 
 typedef struct
 {
@@ -30,32 +34,35 @@ typedef struct
 int working = 1;
 char* curtext = NULL;
 
-Image* background;
-Image* icon;
+
+struct ya2d_texture* background;
+struct ya2d_texture* icon;
 
 extern void kmain();
+extern u8 msx[];
 
 int drawthread(SceSize args, void *argp){
     
     while (working){
-        clearScreen(CLEAR_COLOR);
+        ya2d_start_drawing();
+        ya2d_clear_screen(CLEAR_COLOR);
         
-        blitAlphaImageToScreen(0, 0, 480, 272, background, 0, 0);
-        blitAlphaImageToScreen(0, 0, icon->imageWidth, icon->imageHeight, icon, 0, 272-icon->imageHeight);
+        ya2d_draw_texture(background, 0, 0);
+        ya2d_draw_texture(icon, 0, 0);
 
         if (curtext){
-            fillScreenRect(0x8000ff00, 100, 100, 8*strlen(curtext), 8);
-            printTextScreen(100, 100, curtext, WHITE_COLOR);
+            ya2d_draw_rect(100, 100, 8*strlen(curtext), 8, 0x8000ff00, 1);
+            tinyFontPrintText((void*)(0x40000000 | 0x04000000), msx, 100, 100, curtext, WHITE_COLOR, NULL);
         }
 
-        flipScreen();
+        ya2d_finish_drawing();
+        ya2d_swapbuffers();
     }
 
     return 0;
 }
 
 void loadGraphics(int argc, char** argv){
-    initGraphics();
 
     PBPHeader header;
     
@@ -63,8 +70,9 @@ void loadGraphics(int argc, char** argv){
     sceIoRead(fd, &header, sizeof(PBPHeader));
     sceIoClose(fd);
     
-    background = loadImage(argv[0], header.pic1_offset);
-    icon = loadImage(argv[0], header.icon0_offset);
+    ya2d_init();
+    background = ya2d_load_PNG_file_offset(argv[0], YA2D_PLACE_VRAM, header.pic1_offset);
+    icon = ya2d_load_PNG_file_offset(argv[0], YA2D_PLACE_VRAM, header.icon0_offset);
 
     SceUID thid = sceKernelCreateThread("draw_thread", &drawthread, 0x10, 0x20000, PSP_THREAD_ATTR_USER|PSP_THREAD_ATTR_VFPU, NULL);
     if (thid >= 0){
