@@ -35,6 +35,8 @@ all:
 	cp PSP/res/LIBS/pspdecrypt.prx dist/tmp/PSP/GAME/DC10/
 	cp PSP/res/LIBS/libpsardumper.prx dist/tmp/PSP/GAME/DC10/
 	cp PSP/res/LIBS/lflash_fdisk.prx dist/tmp/PSP/GAME/DC10/
+	cp PSP/res/LIBS/pspdecrypt.prx dist/tmp/PSP/GAME/ARK150Addon660/
+	cp PSP/res/LIBS/libpsardumper.prx dist/tmp/PSP/GAME/ARK150Addon660/
 	cd dist/tmp/ && zip -m -r FasterARK_psp_full.zip * && cd ../../ && mv dist/tmp/FasterARK_psp_full.zip dist/
 	rm -r dist/tmp/
 #	PS Vita Standalone Installer
