@@ -51,7 +51,7 @@ int drawthread(SceSize args, void *argp){
 
         if (curtext){
             ya2d_draw_rect(100, 100, 8*strlen(curtext), 8, 0x8000ff00, 1);
-            tinyFontPrintTextScreenBuf(ya2d_get_drawBuffer(), msx, 100, 100, curtext, WHITE_COLOR, NULL);
+            tinyFontPrintTextScreenBuf(ya2d_get_drawbuffer(), msx, 100, 100, curtext, WHITE_COLOR, NULL);
         }
 
         ya2d_finish_drawing();
