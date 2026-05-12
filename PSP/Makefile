@@ -16,7 +16,7 @@ PSP_EBOOT_ICON = res/icon0.png
 PSP_EBOOT_PIC1 = res/pic1.png
 
 LIBDIR = 
-LIBS = -lpspexploit -lya2d -ltinyfont -lpng -lz -lpspmath -lpspvram -lpspgu -lpspgum -lpsprtc -lpspjpeg
+LIBS = -lpspexploit -lya2d -ltinyfont -lpng -lz -lpspmath -lpspvram -lpspgu -lpspgum -lpsprtc
 
 PSPSDK = $(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak
