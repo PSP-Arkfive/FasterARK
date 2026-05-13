@@ -311,11 +311,6 @@ void installFlash0Files(){
         setInfoMsg(INFO_MSG, flash_files[i].dest);
         copy_file(path, flash_files[i].dest);
     }
-
-    // delete VSH Menu on memory stick
-    strcpy(path, ark_config.arkpath);
-    strcat(path, VSH_MENU);
-    sceIoRemove(path);
 }
 
 void installDCFiles(){
