@@ -147,7 +147,7 @@ int main(int argc, char** argv){
     loadGraphics(argc, argv);
     
     updateARK();
-    
+
     sceKernelExitGame();
     
     return 0;

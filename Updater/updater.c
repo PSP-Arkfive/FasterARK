@@ -69,6 +69,9 @@ char* cleanup_files[] = {
     "USBDEV.PRX",
     "FLASH150.ARK",
     "DC10.ARK",
+    "XMBCTRL.PRX",
+    "RECOVERY.PRX",
+    "RECOVERY.PBP",
 };
 
 char* cleanup_files_psp[] = {
@@ -472,5 +475,6 @@ int updateARK(){
     }
 
     sceKernelDelayThread(1000000);
+
     return 0;
 }
