@@ -242,8 +242,8 @@ void installFlash0Files(){
     char flash0_ark[ARK_PATH_SIZE];
     strcpy(flash0_ark, ark_config.arkpath);
     strcat(flash0_ark, FLASH0_ARK);
-    SceUID fd = sceIoOpen(flash0_ark, PSP_O_RDONLY, 0777);
     open_flash();
+    SceUID fd = sceIoOpen(flash0_ark, PSP_O_RDONLY, 0777);
     extractArchive(fd, "flash0:/", filter_vita_files);
     sceIoClose(fd);
 
@@ -258,12 +258,30 @@ void installFlash0Files(){
 }
 
 void installDCFiles(){
-    char dc10_ark[ARK_PATH_SIZE];
-    strcpy(dc10_ark, ark_config.arkpath);
-    strcat(dc10_ark, DC10_ARK);
-    SceUID fd = sceIoOpen(dc10_ark, PSP_O_RDONLY, 0777);
-    extractArchive(fd, ARK_DC_PATH, NULL);
+    SceUID fd;
+    char path[ARK_PATH_SIZE];
+    strcpy(path, ark_config.arkpath);
+    strcat(path, DC10_ARK);
+    fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
+    extractArchive(fd, ARK_DC_PATH "/", NULL);
     sceIoClose(fd);
+
+    strcpy(path, ark_config.arkpath);
+    strcat(path, FLASH0_ARK);
+    fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
+    extractArchive(fd, ARK_DC_PATH "/", filter_vita_files);
+    sceIoClose(fd);
+
+    // install extra files
+    for (int i=0; i<NELEMS(flash_files); i++){
+        char dest[ARK_PATH_SIZE];
+        strcpy(path, ark_config.arkpath);
+        strcat(path, flash_files[i].orig);
+        strcpy(dest, ARK_DC_PATH);
+        strcat(dest, strstr(flash_files[i].dest, "/"));
+        setInfoMsg(INFO_MSG, flash_files[i].dest);
+        copy_file(path, dest);
+    }
 }
 
 void installDC150Files(){
@@ -271,7 +289,7 @@ void installDC150Files(){
     strcpy(flash150_ark, ark_config.arkpath);
     strcat(flash150_ark, FLASH150_ARK);
     SceUID fd = sceIoOpen(flash150_ark, PSP_O_RDONLY, 0777);
-    extractArchive(fd, ARK_DC_PATH_150, NULL);
+    extractArchive(fd, ARK_DC_PATH_150 "/", NULL);
     sceIoClose(fd);
 }
 
@@ -332,7 +350,8 @@ int updateARK(){
         case FULL_INSTALL: setInfoMsg(INFO_MSG, "Normal Installation"); doFullInstall(); break;
     }
 
-    if (IS_PSP(&ark_config)){
+    ARKConfig* ac = &ark_config;
+    if (IS_PSP(ac)){
         setInfoMsg(INFO_MSG, "Installing flash0 files...");
         installFlash0Files();
 

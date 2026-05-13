@@ -13,6 +13,7 @@
 
 #include <ya2d.h>
 #include <tinyfont.h>
+#include <systemctrl_ark.h>
 
 #include "main.h"
 
@@ -41,7 +42,7 @@ int nopts = 0;
 char msg[256];
 int msg_type = INFO_MSG;
 int msg_colors[] = { GREEN_COLOR, YELLOW_COLOR, RED_COLOR };
-const char* HEADER = "ARK Updater";
+char header[64];
 
 
 void setInfoMsg(int type, char* txt){
@@ -75,10 +76,10 @@ void drawMenu(){
     // menu window
     ya2d_draw_rect(x, y, w, h, color, 1);
 
-    int tl = strlen(HEADER);
+    int tl = strlen(header);
     int dx = ((w-8*tl)/2);
     ya2d_draw_rect(x+dx, y+5, 8*tl, 8, 0x8000ff00, 1);
-    tinyFontPrintTextScreenBuf(ya2d_get_drawbuffer(), msx, x + dx, y+5, HEADER, WHITE_COLOR, NULL);
+    tinyFontPrintTextScreenBuf(ya2d_get_drawbuffer(), msx, x + dx, y+5, header, WHITE_COLOR, NULL);
 
     // menu items
     int cur_x;
@@ -131,7 +132,9 @@ void loadGraphics(int argc, char** argv){
     background = ya2d_load_PNG_file_offset(argv[0], YA2D_PLACE_RAM, pbp_header.pic1_offset);
     icon = ya2d_load_PNG_file_offset(argv[0], YA2D_PLACE_RAM, pbp_header.icon0_offset);
 
-    SceUID thid = sceKernelCreateThread("draw_thread", &drawthread, 0x10, 0x20000, PSP_THREAD_ATTR_USER|PSP_THREAD_ATTR_VFPU, NULL);
+    snprintf(header, sizeof(header), "ARK Updater %d.%d.%d", ARK_MAJOR_VERSION, ARK_MINOR_VERSION, ARK_MICRO_VERSION);
+
+    SceUID thid = sceKernelCreateThread("draw_thread", &drawthread, 0x10, 0x20000, PSP_THREAD_ATTR_VSH|PSP_THREAD_ATTR_VFPU, NULL);
     if (thid >= 0){
         // start thread and wait for it to end
         sceKernelStartThread(thid, 0, NULL);
