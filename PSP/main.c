@@ -71,8 +71,8 @@ void loadGraphics(int argc, char** argv){
     
     ya2d_init();
     ya2d_set_vsync(1);
-    background = ya2d_load_PNG_file_offset(argv[0], YA2D_PLACE_VRAM, header.pic1_offset);
-    icon = ya2d_load_PNG_file_offset(argv[0], YA2D_PLACE_VRAM, header.icon0_offset);
+    background = ya2d_load_PNG_file_offset(argv[0], YA2D_PLACE_RAM, header.pic1_offset);
+    icon = ya2d_load_PNG_file_offset(argv[0], YA2D_PLACE_RAM, header.icon0_offset);
 
     SceUID thid = sceKernelCreateThread("draw_thread", &drawthread, 0x10, 0x20000, PSP_THREAD_ATTR_USER|PSP_THREAD_ATTR_VFPU, NULL);
     if (thid >= 0){
