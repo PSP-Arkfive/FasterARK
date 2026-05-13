@@ -125,6 +125,7 @@ void copyLibraryFiles(){
     strcpy(vshmenu, arkconf.arkpath);
     strcat(vshmenu, VSH_MENU);
     CopyFile(vshmenu, VSH_MENU_FLASH);
+    k_tbl->KernelIORemove(vshmenu);
 
     if (CopyFile("usbdevice.prx", "flash0:/kd/usbdevice.prx") < 0
             && CopyFile("ms0:/PSP/LIBS/usbdevice.prx", "flash0:/kd/usbdevice.prx") < 0){

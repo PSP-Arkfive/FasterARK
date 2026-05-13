@@ -10,7 +10,7 @@ CFLAGS = -std=c99 -Os -G0 -Wall
 INCDIR = 
 LIBDIR = 
 
-LIBS = -lansic -ltinyfont -lya2d -lpng -lz -lpspgum -lpspgu -lpspvram -lpspmath -lpspsystemctrl_user -larkctrl -lpspkubridge -lpsppower
+LIBS = -lansic -ltinyfont -lya2d -lpng -lz -lpspgum -lpspgu -lpspvram -lpspmath -lpspsystemctrl_user -lpspkubridge -lpsppower
 
 CXXFLAGS = $(CFLAGS)
 ASFLAGS = $(CFLAGS)

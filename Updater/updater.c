@@ -71,6 +71,19 @@ char* cleanup_files[] = {
     "DC10.ARK",
 };
 
+char* cleanup_files_psp[] = {
+    "H.BIN",
+    "K.BIN",
+    "ARK.BIN",
+    "ARK4.BIN",
+    "ARKX.BIN",
+    "XBOOT.PBP",
+    "POPS.PRX",
+    "POPSMAN.PRX",
+    "PS1SPU.PRX",
+    "MEDIASYN.PRX",
+};
+
 int install_type = FULL_INSTALL;
 
 struct {
@@ -88,6 +101,17 @@ int psp_model = 0;
 
 unsigned char buf[BUF_SIZE];
 
+
+void getArkConfig(){
+    void* getArkConfig = NULL;
+    struct KernelCallArg args;
+    args.arg1 = (u32)&ark_config;
+
+    getArkConfig = (void*)sctrlHENFindFunction("SystemControl", "SystemCtrlForKernel", 0xB00B1E55); // ARK-4
+    if (!getArkConfig) getArkConfig = (void*)sctrlHENFindFunction("SystemControl", "ArkCtrl", 0xB00B1E55); // ARK-5
+    
+    kuKernelCall(getArkConfig, &args);
+}
 
 void open_flash(){
     while(sceIoUnassign("flash0:") < 0) {
@@ -139,10 +163,21 @@ void checkSavedataFolder(){
         // add trailing / to facilitate concatenations
         strcat(ark_config.arkpath, "/");
 
-        // notify SystemControl of the new arkpath
-        sctrlArkSetConfig(&ark_config);
-
 		install_type = LITE_INSTALL; // lite installation
+
+        // copy config files to savedata folder
+        char* settings_ark = SEPLUGINS_MS0 "SETTINGS.TXT";
+        char* settings_arkmenu = SEPLUGINS_MS0 "ARKMENU.BIN";
+        settings_ark[0] = ark_config.arkpath[0];
+        settings_ark[1] = ark_config.arkpath[1];
+        settings_arkmenu[0] = ark_config.arkpath[0];
+        settings_arkmenu[1] = ark_config.arkpath[1];
+        strcpy(path, ark_config.arkpath);
+        strcat(path, "SETTINGS.TXT");
+        copy_file(settings_ark, path);
+        strcpy(path, ark_config.arkpath);
+        strcat(path, "ARKMENU.BIN");
+        copy_file(settings_arkmenu, path);
     }
 }
 
@@ -236,25 +271,48 @@ void doFullInstall(){
     sceIoLseek32(fd, pbp_header.psar_offset, PSP_SEEK_SET);
     extractArchive(fd, ark_config.arkpath, filter_savedata_full_install);
     sceIoClose(fd);
+
+    // cleanup old files
+    fd = sceIoDopen(ark_config.arkpath);
+    SceIoDirent dit; memset(&dit, 0, sizeof(dit));
+    while (sceIoDread(fd, &dit) > 0){
+        if (dit.d_name[0] == '.') continue;
+        int delete = 1;
+        for (int i=0; i<NELEMS(savedata_files_full) && delete; i++){
+            if (strcmp(dit.d_name, savedata_files_full[i]) == 0){
+                delete = 0;
+            }
+        }
+        if (delete){
+            char path[ARK_PATH_SIZE];
+            strcpy(path, ark_config.arkpath);
+            strcat(path, dit.d_name);
+            sceIoRemove(path);
+        }
+    }
 }
 
 void installFlash0Files(){
-    char flash0_ark[ARK_PATH_SIZE];
-    strcpy(flash0_ark, ark_config.arkpath);
-    strcat(flash0_ark, FLASH0_ARK);
+    char path[ARK_PATH_SIZE];
+    strcpy(path, ark_config.arkpath);
+    strcat(path, FLASH0_ARK);
     open_flash();
-    SceUID fd = sceIoOpen(flash0_ark, PSP_O_RDONLY, 0777);
+    SceUID fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
     extractArchive(fd, "flash0:/", filter_vita_files);
     sceIoClose(fd);
 
     // install extra files
     for (int i=0; i<NELEMS(flash_files); i++){
-        char path[ARK_PATH_SIZE];
         strcpy(path, ark_config.arkpath);
         strcat(path, flash_files[i].orig);
         setInfoMsg(INFO_MSG, flash_files[i].dest);
         copy_file(path, flash_files[i].dest);
     }
+
+    // delete VSH Menu on memory stick
+    strcpy(path, ark_config.arkpath);
+    strcat(path, VSH_MENU);
+    sceIoRemove(path);
 }
 
 void installDCFiles(){
@@ -293,6 +351,16 @@ void installDC150Files(){
     sceIoClose(fd);
 }
 
+void cleanupFilesPSP(){
+    for (int i=0; i<NELEMS(cleanup_files_psp); i++){
+        char path[ARK_PATH_SIZE];
+        strcpy(path, ark_config.arkpath);
+        strcat(path, cleanup_files_psp[i]);
+        setInfoMsg(INFO_MSG, cleanup_files_psp[i]);
+        sceIoRemove(path);
+    }
+}
+
 void cleanupFiles(){
     for (int i=0; i<NELEMS(cleanup_files); i++){
         char path[ARK_PATH_SIZE];
@@ -317,11 +385,16 @@ int updateARK(){
         "/\\ - Exit",
     };
 
+    ARKConfig* ac = &ark_config;
+    getArkConfig();
+    psp_model = kuKernelGetModel();
+
+    if (!IS_ARK_CONFIG(ac)){
+        ErrorExit(5000, "ERROR: not running ARK!");
+    }
+
     options = menuopts;
     nopts = NELEMS(menuopts);
-
-    sctrlArkGetConfig(&ark_config);
-    psp_model = kuKernelGetModel();
 
     while (1)
     {
@@ -350,7 +423,6 @@ int updateARK(){
         case FULL_INSTALL: setInfoMsg(INFO_MSG, "Normal Installation"); doFullInstall(); break;
     }
 
-    ARKConfig* ac = &ark_config;
     if (IS_PSP(ac)){
         setInfoMsg(INFO_MSG, "Installing flash0 files...");
         installFlash0Files();
@@ -365,6 +437,8 @@ int updateARK(){
                 installDC150Files();
             }    
         }
+
+        cleanupFilesPSP();
     }
 
     setInfoMsg(INFO_MSG, "Cleaning Files");
