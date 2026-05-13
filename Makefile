@@ -39,13 +39,19 @@ all:
 	cp PSP/res/LIBS/pspdecrypt.prx dist/tmp/PSP/GAME/ARK150Addon660/
 	cp PSP/res/LIBS/libpsardumper.prx dist/tmp/PSP/GAME/ARK150Addon660/
 	cd dist/tmp/ && zip -m -r FasterARK_psp_full.zip * && cd ../../ && mv dist/tmp/FasterARK_psp_full.zip dist/
-	rm -r dist/tmp/
 #	PS Vita Standalone Installer
 	mkdir -p PSVita/build
 	cd PSVita/build && cmake .. && make && cd ../../
 	cp PSVita/build/FasterARK.vpk dist/FasterARK_psvita.vpk
+#	Updater
+	make -C Updater
+	mkdir -p dist/tmp/PSP/GAME/UPDATE/
+	cp Updater/EBOOT.PBP dist/tmp/PSP/GAME/UPDATE/
+	cd dist/tmp/ && zip -m -r UPDATE.zip * && cd ../../ && mv dist/tmp/UPDATE.zip dist/
+	rm -r dist/tmp/
 
 clean:
 	rm -rf dist
 	rm -rf PSVita/build
 	make -C PSP clean
+	make -C Updater clean
