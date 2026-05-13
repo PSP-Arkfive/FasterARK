@@ -258,7 +258,12 @@ void installFlash0Files(){
 }
 
 void installDCFiles(){
-
+    char dc10_ark[ARK_PATH_SIZE];
+    strcpy(dc10_ark, ark_config.arkpath);
+    strcat(dc10_ark, DC10_ARK);
+    SceUID fd = sceIoOpen(dc10_ark, PSP_O_RDONLY, 0777);
+    extractArchive(fd, ARK_DC_PATH, NULL);
+    sceIoClose(fd);
 }
 
 void installDC150Files(){
@@ -266,7 +271,7 @@ void installDC150Files(){
     strcpy(flash150_ark, ark_config.arkpath);
     strcat(flash150_ark, FLASH150_ARK);
     SceUID fd = sceIoOpen(flash150_ark, PSP_O_RDONLY, 0777);
-    extractArchive(fd, ARK_DC_PATH_150 "/", NULL);
+    extractArchive(fd, ARK_DC_PATH_150, NULL);
     sceIoClose(fd);
 }
 

@@ -27,6 +27,7 @@ all:
 	cp PSP/res/LIBS/ipl_update.prx dist/tmp/PSP/GAME/CustomIPL/
 	cp PSP/res/LIBS/kbooti_update.prx dist/tmp/PSP/GAME/CustomIPL/
 	cp PSP/res/LIBS/kpspident.prx dist/tmp/PSP/GAME/CustomIPL/
+	cp PSP/res/LIBS/iop.prx dist/tmp/PSP/GAME/DC10/
 	cp PSP/res/LIBS/ipl_update.prx dist/tmp/PSP/GAME/DC10/
 	cp PSP/res/LIBS/usbdevice.prx dist/tmp/PSP/GAME/DC10/
 	cp PSP/res/LIBS/idsregeneration.prx dist/tmp/PSP/GAME/DC10/
