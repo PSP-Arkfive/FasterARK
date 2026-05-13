@@ -1,6 +1,12 @@
 # Install Instructions
 
-For `PSP` users:
+For `ARK-4` users (any device):
+- Only if `OTA` updates are not working.
+- Download `UPDATE.zip` and extract.
+- Copy `PSP` folder to `Memory Stick` (or `pspemu` folder on `PS Vita`)
+- Run the Updater and follow instructions.
+
+For new `PSP` users:
 - Download your prefered variant of `FasterARK_psp.zip`.
 - `Extract` the package onto your `Memory Stick`.
 - Run `FasterARK` and let it work.
@@ -15,7 +21,8 @@ The `Full` variant (`FasterARK_psp_full.zip`) contains the following extras:
 - `LEDA Plugin`: allows running `1.50 homebrew` on any firmware and psp or vita model.
 - `ARK-150 Addon`: Only usable on 1K, installs the full 1.50 ARK firmware on memory stick to dual boot with latest firmware (installation and usage: https://github.com/PSP-Arkfive/ARK-150).
  
-For `PS Vita` users:
+For new `PS Vita` users:
 - Download `FasterARK_psvita.vpk`
 - `Install` using VitaShell.
 - Run `FasterARK` and choose first option.
+- You can also use `Adrenaline-8` to boot into `ARK-5`. 
