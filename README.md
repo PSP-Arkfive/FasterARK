@@ -5,6 +5,7 @@ For `ARK-4` users (any device):
 - Download `UPDATE.zip` and extract.
 - Copy `PSP` folder to `Memory Stick` (or `pspemu` folder on `PS Vita`)
 - Run the Updater and follow instructions.
+- `Adrenaline-ARK` users must update to `Adrenaline-8`.
 
 For new `PSP` users:
 - Download your prefered variant of `FasterARK_psp.zip`.
