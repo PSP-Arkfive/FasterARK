@@ -1,3 +1,5 @@
+#include <errno.h>
+#include <sys/socket.h>
 #include <pspsdk.h>
 #include <pspdisplay.h>
 #include <pspgu.h>
@@ -10,6 +12,13 @@
 
 PSP_MODULE_INFO("FasterARK PSP", PSP_MODULE_USER, 1, 0);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER | PSP_THREAD_ATTR_VFPU);
+
+PSP_DISABLE_NEWLIB();
+PSP_DISABLE_NEWLIB_PIPE_SUPPORT();
+PSP_DISABLE_NEWLIB_SOCKET_SUPPORT();
+PSP_DISABLE_NEWLIB_TIMEZONE_SUPPORT();
+PSP_DISABLE_NEWLIB_CWD_SUPPORT();
+PSP_DISABLE_AUTOSTART_PTHREAD();
 
 static KernelFunctions _ktbl;
 KernelFunctions* k_tbl = &_ktbl;
