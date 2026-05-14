@@ -17,6 +17,7 @@ extern int working ;
 extern char* curtext;
 extern KernelFunctions* k_tbl;
 SceModule* loadexec = NULL;
+char* eboot_path = NULL;
 
 ARKConfig arkconf = {
     .magic = ARK_CONFIG_MAGIC,
@@ -122,18 +123,27 @@ void extractFlash0Archive(char* archive, char* dest_path){
 
 void copyLibraryFiles(){
 
-    char vshmenu[ARK_PATH_SIZE];
-    strcpy(vshmenu, arkconf.arkpath);
-    strcat(vshmenu, VSH_MENU);
-    CopyFile(vshmenu, VSH_MENU_FLASH);
+    char path[ARK_PATH_SIZE];
+    strcpy(path, arkconf.arkpath);
+    strcat(path, VSH_MENU);
+    CopyFile(path, VSH_MENU_FLASH);
 
-    if (CopyFile("usbdevice.prx", "flash0:/kd/usbdevice.prx") < 0
+    strcpy(path, eboot_path);
+    char* filename = strrchr(path, '/')+1;
+
+
+    strcpy(filename, "usbdevice.prx");
+    if (CopyFile(path, "flash0:/kd/usbdevice.prx") < 0
             && CopyFile("ms0:/PSP/LIBS/usbdevice.prx", "flash0:/kd/usbdevice.prx") < 0){
         curtext = "ERROR copying usbdevice.prx";
+        k_tbl->KernelDelayThread(4*1000*1000);
     }
-    if (CopyFile("idsregeneration.prx", "flash0:/kd/idsregeneration.prx") < 0
+
+    strcpy(filename, "idsregeneration.prx");
+    if (CopyFile(path, "flash0:/kd/idsregeneration.prx") < 0
             && CopyFile("ms0:/PSP/LIBS/idsregeneration.prx", "flash0:/kd/idsregeneration.prx") < 0){
         curtext = "ERROR copying idsregeneration.prx";
+        k_tbl->KernelDelayThread(4*1000*1000);
     }
 }
 

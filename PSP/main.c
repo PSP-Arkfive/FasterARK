@@ -48,6 +48,7 @@ struct ya2d_texture* background;
 struct ya2d_texture* icon;
 
 extern void kmain();
+extern char* eboot_path;
 
 int drawthread(SceSize args, void *argp){
     
@@ -93,6 +94,7 @@ void loadGraphics(int argc, char** argv){
 int main(int argc, char** argv){
 
     int res = 0;
+    eboot_path = argv[0];
 
     loadGraphics(argc, argv);
 
