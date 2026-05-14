@@ -60,7 +60,7 @@ all:
 	make -C Updater
 	mkdir -p dist/tmp/PSP/GAME/UPDATE/
 	cp Updater/EBOOT.PBP dist/tmp/PSP/GAME/UPDATE/
-	cd dist/tmp/ && zip -m -r UPDATE.zip * && cd ../../ && mv dist/tmp/UPDATE.zip dist/
+	cd dist/tmp/ && zip -m -r ARK_UPDATE.zip * && cd ../../ && mv dist/tmp/ARK_UPDATE.zip dist/
 	rm -r dist/tmp/
 	rm -rf Updater/Resources/LIBS
 	rm -rf Updater/Resources/ARK_01234
