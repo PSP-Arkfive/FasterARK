@@ -155,7 +155,6 @@ void copy_file(char* orig, char* dest){
     sceIoClose(fdw);
 }
 
-
 void checkSavedataFolder(){
     SceIoStat stat;
     char path[ARK_PATH_SIZE]; strcpy(path, ark_config.arkpath); path[strlen(path)-1] = 0; // remove trailing '/' or else sceIoGetstat won't work
