@@ -357,6 +357,9 @@ void cleanupFilesPSP(){
         setInfoMsg(INFO_MSG, cleanup_files_psp[i]);
         sceIoRemove(path);
     }
+    sceIoRemove("flash0:/kd/ark_idsreg.prx");
+    sceIoRemove("flash0:/vsh/module/ark_usbdev.prx");
+    sceIoRemove("flash0:/vsh/module/ark_recovery.prx");
 }
 
 void cleanupFiles(){
