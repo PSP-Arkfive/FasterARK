@@ -65,6 +65,7 @@ char* savedata_files_lite[] = {
 };
 
 char* cleanup_files[] = {
+    "IOP.PRX",
     "IDSREG.PRX",
     "USBDEV.PRX",
     "FLASH150.ARK",
@@ -87,7 +88,12 @@ char* cleanup_files_psp[] = {
     "MEDIASYN.PRX",
 };
 
-int install_type = FULL_INSTALL;
+struct {
+    char* orig;
+    char* dest;
+} dc_files[] = {
+    {"IOP.PRX", ARK_DC_PATH "/kd/iop.prx"},
+};
 
 struct {
     char* orig;
@@ -101,7 +107,7 @@ struct {
 
 ARKConfig ark_config;
 int psp_model = 0;
-
+int install_type = FULL_INSTALL;
 unsigned char buf[BUF_SIZE];
 
 
@@ -328,6 +334,14 @@ void installDCFiles(){
     extractArchive(fd, ARK_DC_PATH "/", filter_vita_files);
     sceIoClose(fd);
 
+    // install DC files
+    for (int i=0; i<NELEMS(dc_files); i++){
+        strcpy(path, ark_config.arkpath);
+        strcat(path, dc_files[i].orig);
+        setInfoMsg(INFO_MSG, dc_files[i].dest);
+        copy_file(path, dc_files[i].dest);
+    }
+
     // install extra files
     for (int i=0; i<NELEMS(flash_files); i++){
         char dest[ARK_PATH_SIZE];
@@ -338,6 +352,10 @@ void installDCFiles(){
         setInfoMsg(INFO_MSG, flash_files[i].dest);
         copy_file(path, dest);
     }
+
+    strcpy(ark_config.arkpath);
+    strcat();
+    copy_file(path, dest);
 }
 
 void installDC150Files(){

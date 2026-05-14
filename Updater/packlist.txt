@@ -11,3 +11,4 @@ XBOOT.PBP,Resources/ARK_01234/XBOOT.PBP
 PS1SPU.PRX,Resources/LIBS/peops.prx
 IDSREG.PRX,Resources/LIBS/idsregeneration.prx
 USBDEV.PRX,Resources/LIBS/usbdevice.prx
+IOP.PRX,Resources/LIBS/iop.prx
