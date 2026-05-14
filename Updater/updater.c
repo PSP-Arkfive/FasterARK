@@ -188,9 +188,11 @@ void checkSavedataFolder(){
         strcpy(path, ark_config.arkpath);
         strcat(path, "SETTINGS.TXT");
         copy_file(settings_ark, path);
+        sceIoRemove(path);
         strcpy(path, ark_config.arkpath);
         strcat(path, "ARKMENU.BIN");
         copy_file(settings_arkmenu, path);
+        sceIoRemove(path);
     }
 }
 
