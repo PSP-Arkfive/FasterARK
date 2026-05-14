@@ -35,6 +35,7 @@ int isVitaFile(char* filename){
             || strstr(filename, "vita") !=NULL // Vita modules
     );
 }
+
 void open_flash(){
     while(k_tbl->IoUnassign("flash0:") < 0) {
         k_tbl->KernelDelayThread(500000);
