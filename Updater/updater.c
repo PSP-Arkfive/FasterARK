@@ -62,6 +62,11 @@ char* savedata_files_lite[] = {
     "SETTINGS.TXT",
     "ARKMENU.BIN",
     "UPDATER.TXT",
+    "FLASH150.ARK",
+    "DC10.ARK",
+    "IDSREG.PRX",
+    "USBDEV.PRX",
+    "IOP.PRX",
 };
 
 char* cleanup_files[] = {
