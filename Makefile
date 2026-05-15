@@ -1,4 +1,8 @@
-all:
+.PHONY: psp vita updater
+
+all: psp vita updater
+
+psp:
 	make -C PSP
 #	PSP Lite Install
 	mkdir -p dist/tmp/PSP/GAME/FasterARK/
@@ -39,7 +43,11 @@ all:
 	cp Resources/LIBS/pspdecrypt.prx dist/tmp/PSP/GAME/ARK150Addon660/
 	cp Resources/LIBS/libpsardumper.prx dist/tmp/PSP/GAME/ARK150Addon660/
 	cd dist/tmp/ && zip -m -r FasterARK_psp_full.zip * && cd ../../ && mv dist/tmp/FasterARK_psp_full.zip dist/
+	rm -r dist/tmp/
+
+vita:
 #	PS Vita Standalone Installer
+	mkdir -p dist
 	cp -r Resources/ARK_01234 PSVita/res/save/
 	cp -r Resources/Extras/* PSVita/res/save/ARK_01234/
 	cp -r Resources/PSVita/* PSVita/res/save/ARK_01234/
@@ -48,7 +56,10 @@ all:
 	cd PSVita/build && cmake .. && make && cd ../../
 	cp PSVita/build/FasterARK.vpk dist/FasterARK_psvita.vpk
 	rm -rf PSVita/res/save/ARK_01234
+
+updater:
 #	Updater
+	mkdir -p dist/tmp/
 	cp -r Resources/LIBS Updater/Resources/
 	cp -r Resources/ARK_01234 Updater/Resources/
 	cp Resources/DC10/DC10.ARK Updater/Resources/ARK_01234/
