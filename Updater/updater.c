@@ -204,6 +204,15 @@ int filter_vita_files(char* filename){
     );
 }
 
+int filter_savedata_lite_install(char* filename){
+    for (int i=0; i<NELEMS(savedata_files_lite); i++){
+        if (strcmp(filename, savedata_files_lite[i]) == 0){
+            return 0; // install
+        }
+    }
+    return 1; // not in savedata list: disallow
+}
+
 int filter_savedata_full_install(char* filename){
     for (int i=0; i<NELEMS(savedata_files_full); i++){
         if (strcmp(filename, savedata_files_full[i]) == 0){
@@ -211,16 +220,8 @@ int filter_savedata_full_install(char* filename){
             char path[ARK_PATH_SIZE];
             strcpy(path, ark_config.arkpath);
             strcat(path, filename);
-            if (sceIoGetstat(path, &stat) < 0) return 1; // not previously there? do not install
-            return 0; // install
-        }
-    }
-    return 1; // not in savedata list: disallow
-}
-
-int filter_savedata_lite_install(char* filename){
-    for (int i=0; i<NELEMS(savedata_files_lite); i++){
-        if (strcmp(filename, savedata_files_lite[i]) == 0){
+            if (sceIoGetstat(path, &stat) < 0 && filter_savedata_lite_install(filename))
+                return 1; // not previously there and not minimal file: do not install
             return 0; // install
         }
     }
@@ -311,7 +312,9 @@ void installFlash0Files(){
     char path[ARK_PATH_SIZE];
     strcpy(path, ark_config.arkpath);
     strcat(path, FLASH0_ARK);
+
     open_flash();
+    
     SceUID fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
     extractArchive(fd, "flash0:/", filter_vita_files);
     sceIoClose(fd);
