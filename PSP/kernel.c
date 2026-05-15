@@ -1,5 +1,6 @@
 #include <pspsdk.h>
 
+#include <systemctrl.h>
 #include <systemctrl_ark.h>
 #include <bootloadex.h>
 #include <rebootexconfig.h>
@@ -133,15 +134,15 @@ void copyLibraryFiles(){
 
 
     strcpy(filename, "usbdevice.prx");
-    if (CopyFile(path, "flash0:/kd/usbdevice.prx") < 0
-            && CopyFile("ms0:/PSP/LIBS/usbdevice.prx", "flash0:/kd/usbdevice.prx") < 0){
+    if (CopyFile(path, USBDEV_PRX_FLASH) < 0
+            && CopyFile("ms0:/PSP/LIBS/usbdevice.prx", USBDEV_PRX_FLASH) < 0){
         curtext = "ERROR copying usbdevice.prx";
         k_tbl->KernelDelayThread(4*1000*1000);
     }
 
     strcpy(filename, "idsregeneration.prx");
-    if (CopyFile(path, "flash0:/kd/idsregeneration.prx") < 0
-            && CopyFile("ms0:/PSP/LIBS/idsregeneration.prx", "flash0:/kd/idsregeneration.prx") < 0){
+    if (CopyFile(path, IDSREG_PRX_FLASH) < 0
+            && CopyFile("ms0:/PSP/LIBS/idsregeneration.prx", IDSREG_PRX_FLASH) < 0){
         curtext = "ERROR copying idsregeneration.prx";
         k_tbl->KernelDelayThread(4*1000*1000);
     }
