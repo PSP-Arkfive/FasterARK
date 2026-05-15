@@ -2,7 +2,7 @@
 
 For `ARK-4` users (any device):
 - Only if `OTA` updates are not working.
-- Download `UPDATE.zip` and extract.
+- Download `ARK_UPDATE.zip` and extract.
 - Copy `PSP` folder to `Memory Stick` (or `pspemu` folder on `PS Vita`)
 - Run the Updater and follow instructions.
 - `Adrenaline-ARK` users must update to `Adrenaline-8`.
