@@ -76,7 +76,7 @@ int installPS1Plugin() {
     int pluginCheck = sceIoOpen("ur0:tai/ps1cfw_enabler.suprx", SCE_O_RDONLY, 0777);
     if(pluginCheck >= 0) {
         sceIoClose(pluginCheck);
-        updateUi("ARK-X PS1 Plugin found,\n it is recommended to unintall it\n and update to latest NoPspEmuDrm_mod...");
+        displayMsg("WARNING", "ARK-X PS1 Plugin found!\nIt is recommended to uninstall it\nand update to latest NoPspEmuDrm_mod.");
         sceKernelDelayThread(5000000);
     }
     return 0;

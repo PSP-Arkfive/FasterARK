@@ -98,18 +98,48 @@ void drawLines() {
     vita2d_draw_line(960, 524, 960, 544, RGBA8(0x60, 0xA0, 0xFF, 255));
 }
 
+#define MSG_MAX_LINES 8
+#define MSG_LINE_HEIGHT 28
+
 void displayMsg(const char* title, const char* msg) {
+    const char* lines[MSG_MAX_LINES];
+    int numLines = 0;
+    
+    lines[numLines++] = msg;
+    for (const char* p = msg; *p != '\0' && numLines < MSG_MAX_LINES; p++) {
+        if (*p == '\n') {
+            lines[numLines++] = p + 1;
+        }
+    }
+    
+    int boxHeight = 60 + numLines * MSG_LINE_HEIGHT;
+    int boxY = 150;
+    int boxBottomY = boxY + boxHeight;
+    
     startDraw();
     drawLines();
 
-    vita2d_draw_rectangle(100, 150, 760, 120, RGBA8(0x20, 0x20, 0x40, 180));
-    vita2d_draw_line(100, 150, 860, 150, RGBA8(0x40, 0x80, 0xFF, 255));
-    vita2d_draw_line(100, 270, 860, 270, RGBA8(0x40, 0x80, 0xFF, 255));
-    vita2d_draw_line(100, 150, 100, 270, RGBA8(0x40, 0x80, 0xFF, 255));
-    vita2d_draw_line(860, 150, 860, 270, RGBA8(0x40, 0x80, 0xFF, 255));
+    vita2d_draw_rectangle(100, boxY, 760, boxHeight, RGBA8(0x20, 0x20, 0x40, 180));
+    vita2d_draw_line(100, boxY, 860, boxY, RGBA8(0x40, 0x80, 0xFF, 255));
+    vita2d_draw_line(100, boxBottomY, 860, boxBottomY, RGBA8(0x40, 0x80, 0xFF, 255));
+    vita2d_draw_line(100, boxY, 100, boxBottomY, RGBA8(0x40, 0x80, 0xFF, 255));
+    vita2d_draw_line(860, boxY, 860, boxBottomY, RGBA8(0x40, 0x80, 0xFF, 255));
 
-    drawTextCenterColored(190, title, 0x40, 0x80, 0xFF);
-    drawTextCenter(230, msg);
+    drawTextCenterColored(boxY + 40, title, 0x40, 0x80, 0xFF);
+    
+    for (int i = 0; i < numLines; i++) {
+        // Render each line up to \n by using a temp buffer
+        char lineBuf[128];
+        int len = 0;
+        for (const char* p = lines[i]; *p != '\0' && *p != '\n'; p++) {
+            if (len < (int)sizeof(lineBuf) - 1) {
+                lineBuf[len++] = *p;
+            }
+        }
+        lineBuf[len] = '\0';
+        drawTextCenter(boxY + 40 + 28 + i * MSG_LINE_HEIGHT, lineBuf);
+    }
+    
     endDraw();
 }
 
