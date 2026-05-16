@@ -76,9 +76,22 @@ int installPS1Plugin() {
     int pluginCheck = sceIoOpen("ur0:tai/ps1cfw_enabler.suprx", SCE_O_RDONLY, 0777);
     if(pluginCheck >= 0) {
         sceIoClose(pluginCheck);
-        displayMsg("WARNING", "ARK-X PS1 Plugin found!\nIt is recommended to uninstall it\nand update to latest NoPspEmuDrm_mod.");
+        displayMsg("WARNING", "ARK-X PS1 Plugin found!\nIt is recommended to uninstall it\nand update to latest NoPspEmuDrm_mod...");
         sceKernelDelayThread(5000000);
     }
+    
+    // Check if NoPspEmuDrm_mod is installed
+    int noPspEmuKern = sceIoOpen("ur0:tai/NoPspEmuDrm_kern.skprx", SCE_O_RDONLY, 0777);
+    int noPspEmuUser = sceIoOpen("ur0:tai/NoPspEmuDrm_user.suprx", SCE_O_RDONLY, 0777);
+    int noPspEmuFound = (noPspEmuKern >= 0 || noPspEmuUser >= 0);
+    if(noPspEmuKern >= 0) sceIoClose(noPspEmuKern);
+    if(noPspEmuUser >= 0) sceIoClose(noPspEmuUser);
+    
+    if(!noPspEmuFound) {
+        displayMsg("WARNING", "NoPspEmuDrm_mod not found!\nPlease install the latest...");
+        sceKernelDelayThread(5000000);
+    }
+    
     return 0;
 }
 
