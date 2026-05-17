@@ -17,7 +17,6 @@ BUILD_PRX=1
 
 include $(PSPSDK)/lib/build.mak
 
-#ChovySign-CLI --pops psxloader.cue --pops-info "ARK-X" ICON0.PNG --pops-eboot psxloader.prx --no-psvimg --vkey-gen act.dat license.rif 000000000000000000000000 2 --rif license.rif
 psxloader.cue:
 	$(Q)mkpsxiso psxloader.xml
 
@@ -25,3 +24,6 @@ main.c: psxloader.cue
 
 clean:
 	$(Q)rm -f *.elf *.prx *.o *.bin *.cue
+
+# To generate the EBOOT.PBP:
+# ChovySign-CLI --pops psxloader.cue --pops-info "ARK-X" ICON0.PNG --pops-eboot psxloader.prx --no-psvimg --nopspemudrm
