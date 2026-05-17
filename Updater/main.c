@@ -78,6 +78,7 @@ void drawMenu(){
 
     int tl = strlen(header);
     int dx = ((w-8*tl)/2);
+
     ya2d_draw_rect(x+dx, y+5, 8*tl, 8, 0x8000ff00, 1);
     tinyFontPrintTextScreenBuf(ya2d_get_drawbuffer(), msx, x + dx, y+5, header, WHITE_COLOR, NULL);
 
