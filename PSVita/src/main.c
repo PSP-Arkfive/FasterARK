@@ -1,6 +1,4 @@
 #include <vitasdk.h>
-#include <psp2/power.h>
-#include <psp2/io/devctl.h>
 #include <vita2d.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,45 +8,6 @@
 
 #include "install.h"
 #include "ui.h"
-
-void drawBatteryAndStorage() {
-    int batteryPercent = scePowerGetBatteryLifePercent();
-    int isCharging = scePowerIsBatteryCharging();
-
-    SceIoDevInfo info;
-    sceIoDevctl("ux0:", 0x3001, NULL, 0, &info, sizeof(info));
-    float freeSpaceGB = ((float)info.free_size) / (1024 * 1024 * 1024);
-
-    // Determine color for free space
-    uint32_t colorFree = RGBA8(0, 255, 0, 255);
-    if (freeSpaceGB < 2.0f)
-        colorFree = RGBA8(255, 0, 0, 255);
-    else if (freeSpaceGB < 5.0f)
-        colorFree = RGBA8(255, 165, 0, 255);
-
-    // Determine color for battery
-    uint32_t colorBattery = RGBA8(0, 255, 0, 255);
-    if (batteryPercent <= 20)
-        colorBattery = RGBA8(255, 0, 0, 255);
-    else if (batteryPercent <= 30)
-        colorBattery = RGBA8(255, 165, 0, 255);
-
-    // Prepare text
-    char freeText[64];
-    snprintf(freeText, sizeof(freeText), "Free space: %.1f GB", freeSpaceGB);
-
-    char batteryText[64];
-    snprintf(batteryText, sizeof(batteryText), "Battery: %d%% %s",
-             batteryPercent, isCharging ? "(Charging)" : "");
-
-    // Measure width to align right
-    int batteryWidth = vita2d_pgf_text_width(uiGetFont(), 1.0f, batteryText);
-    int freeWidth = vita2d_pgf_text_width(uiGetFont(), 1.0f, freeText);
-
-    // Draw both
-    vita2d_pgf_draw_text(uiGetFont(), 960 - freeWidth - batteryWidth - 40, 20, colorFree, 1.0f, freeText);
-    vita2d_pgf_draw_text(uiGetFont(), 960 - batteryWidth - 20, 20, colorBattery, 1.0f, batteryText);
-}
 
 int main(int argc, const char *argv[]) {
     uiInit();
@@ -87,8 +46,6 @@ int main(int argc, const char *argv[]) {
 
         vita2d_pgf_draw_textf(uiGetFont(), 110, 170 + selection * 30, RGBA8(255, 0, 0, 255), 1.0f, "→");
 
-        drawBatteryAndStorage();
-
         endDraw();
 
         sceCtrlPeekBufferPositive(0, &pad, 1);
@@ -101,6 +58,13 @@ int main(int argc, const char *argv[]) {
             sceKernelDelayThread(200 * 1000);
         } else if (pad.buttons & SCE_CTRL_CROSS) {
             break;
+        }
+    }
+
+    // Pre-install space check for install operations
+    if (selection >= 0 && selection <= 3) {
+        if (checkSpaceBeforeInstall() != 0) {
+            sceKernelExitProcess(0);
         }
     }
 
@@ -133,8 +97,6 @@ int main(int argc, const char *argv[]) {
                     }
 
                     vita2d_pgf_draw_textf(uiGetFont(), 110, 190 + launch_sel * 30, RGBA8(255, 0, 0, 255), 1.0f, "→");
-
-                    drawBatteryAndStorage();
 
                     endDraw();
 
@@ -249,8 +211,6 @@ int main(int argc, const char *argv[]) {
             }
 
             vita2d_pgf_draw_textf(uiGetFont(), 110, 190 + launch_sel * 30, RGBA8(255, 0, 0, 255), 1.0f, "→");
-
-            drawBatteryAndStorage();
 
             endDraw();
             sceCtrlPeekBufferPositive(0, &pad, 1);
