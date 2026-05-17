@@ -18,7 +18,7 @@ void doInstall(void);
 void installARK4Only(void);
 void installARKXOnly(void);
 
-int installPS1Plugin(void);
+int checkPS1Plugin(void);
 int installAnalogPlugin(void);
 void taiReloadConfig(void);
 

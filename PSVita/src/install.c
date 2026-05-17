@@ -71,24 +71,46 @@ int installAnalogPlugin() {
     }
 }
 
-int installPS1Plugin() {
-    updateUi("Checking for ARK-X PS1 Plugin ...");
-    int pluginCheck = sceIoOpen("ur0:tai/ps1cfw_enabler.suprx", SCE_O_RDONLY, 0777);
-    if(pluginCheck >= 0) {
-        sceIoClose(pluginCheck);
-        displayMsg("WARNING", "ARK-X PS1 Plugin found!\nIt is recommended to uninstall it\nand update to latest NoPspEmuDrm_mod...");
+int checkPS1Plugin() {
+    // Check for old ARK-X PS1 plugin in ur0:tai and ux0:tai
+    int oldPluginUr0 = sceIoOpen("ur0:tai/ps1cfw_enabler.suprx", SCE_O_RDONLY, 0777);
+    int oldPluginUx0 = sceIoOpen("ux0:tai/ps1cfw_enabler.suprx", SCE_O_RDONLY, 0777);
+    int oldPluginFound = (oldPluginUr0 >= 0 || oldPluginUx0 >= 0);
+    if(oldPluginUr0 >= 0) sceIoClose(oldPluginUr0);
+    if(oldPluginUx0 >= 0) sceIoClose(oldPluginUx0);
+    
+    // Check for NoPspEmuDrm_mod in both ur0:tai and ux0:tai
+    int noPspEmuKern = sceIoOpen("ur0:tai/NoPspEmuDrm_kern.skprx", SCE_O_RDONLY, 0777);
+    int noPspEmuUser = sceIoOpen("ur0:tai/NoPspEmuDrm_user.suprx", SCE_O_RDONLY, 0777);
+    int noPspEmuKernUx = sceIoOpen("ux0:tai/NoPspEmuDrm_kern.skprx", SCE_O_RDONLY, 0777);
+    int noPspEmuUserUx = sceIoOpen("ux0:tai/NoPspEmuDrm_user.suprx", SCE_O_RDONLY, 0777);
+    int noPspEmuFound = (noPspEmuKern >= 0 || noPspEmuUser >= 0 || 
+                          noPspEmuKernUx >= 0 || noPspEmuUserUx >= 0);
+    int noPspEmuBothLocations = (noPspEmuKern >= 0 || noPspEmuUser >= 0) && 
+                                 (noPspEmuKernUx >= 0 || noPspEmuUserUx >= 0);
+    if(noPspEmuKern >= 0) sceIoClose(noPspEmuKern);
+    if(noPspEmuUser >= 0) sceIoClose(noPspEmuUser);
+    if(noPspEmuKernUx >= 0) sceIoClose(noPspEmuKernUx);
+    if(noPspEmuUserUx >= 0) sceIoClose(noPspEmuUserUx);
+    
+    // Conflict detection: old plugin AND new one both present
+    if(oldPluginFound && noPspEmuFound) {
+        displayMsg("CONFLICT", "Both old PS1 plugin and\nNoPspEmuDrm_mod detected!\nRemove the old ps1cfw_enabler.suprx.");
+        sceKernelDelayThread(5000000);
+    }
+    else if(oldPluginFound) {
+        displayMsg("WARNING", "Old ARK-X PS1 Plugin found!\nIt is recommended to uninstall it\nand update to latest NoPspEmuDrm_mod.");
         sceKernelDelayThread(5000000);
     }
     
-    // Check if NoPspEmuDrm_mod is installed
-    int noPspEmuKern = sceIoOpen("ur0:tai/NoPspEmuDrm_kern.skprx", SCE_O_RDONLY, 0777);
-    int noPspEmuUser = sceIoOpen("ur0:tai/NoPspEmuDrm_user.suprx", SCE_O_RDONLY, 0777);
-    int noPspEmuFound = (noPspEmuKern >= 0 || noPspEmuUser >= 0);
-    if(noPspEmuKern >= 0) sceIoClose(noPspEmuKern);
-    if(noPspEmuUser >= 0) sceIoClose(noPspEmuUser);
-    
     if(!noPspEmuFound) {
-        displayMsg("WARNING", "NoPspEmuDrm_mod not found!\nPlease install the latest...");
+        displayMsg("WARNING", "NoPspEmuDrm_mod not found!\nPlease install the latest\nNoPspEmuDrm_mod for PS1 support.");
+        sceKernelDelayThread(5000000);
+    }
+    
+    // Warn if files are in both ur0 and ux0 (should only be in one)
+    if(noPspEmuBothLocations) {
+        displayMsg("NOTE", "NoPspEmuDrm_mod found in both\nur0:tai/ and ux0:tai/!\nKeep only one copy to avoid issues.");
         sceKernelDelayThread(5000000);
     }
     
@@ -194,7 +216,7 @@ void doInstall() {
     installARK4Only();        // 
     installARKXOnly();        // 
     installAnalogPlugin();    // 
-    installPS1Plugin();       // 
+    checkPS1Plugin();       // 
     taiReloadConfig();        // 
 }
 
