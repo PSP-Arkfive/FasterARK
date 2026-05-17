@@ -184,7 +184,7 @@ int main(int argc, const char *argv[]) {
             displayMsg("Installing Only ARK-X", "Installing Only ARK-X...");
             copySaveFiles();
             installARKXOnly();
-            installPS1Plugin();
+            checkPS1Plugin();
             taiReloadConfig();
             break;
 
