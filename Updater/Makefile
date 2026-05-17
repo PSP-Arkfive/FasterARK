@@ -10,11 +10,11 @@ CFLAGS = -std=c99 -Os -G0 -Wall
 INCDIR = 
 LIBDIR = 
 
-LIBS = -ltinyfont -lya2d -lpng -lz -lpspgum -lpspgu -lpspvram -lpspmath -lpspsystemctrl_user -lpspkubridge -lpsppower
+LIBS = -lpspminicrt -lansic -ltinyfont -lya2d -lpng -lz -lpspgum -lpspgu -lpspvram -lpspmalloc -lpspmath -lpspsystemctrl_user -lpspkubridge -lpsppower
 
 CXXFLAGS = $(CFLAGS)
 ASFLAGS = $(CFLAGS)
-LDFLAGS =
+LDFLAGS = -nostartfiles
 BUILD_PRX = 1
 
 PSP_EBOOT_TITLE = ARK Updater
