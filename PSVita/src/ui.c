@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <math.h>
 #include <psp2/ctrl.h>
+#include <psp2/power.h>
+#include <psp2/io/devctl.h>
 #include "install.h"
 #include "io.h"
 
@@ -71,6 +73,94 @@ void startDraw() {
     vita2d_clear_screen();
 }
 
+void drawBatteryAndStorage() {
+    int batteryPercent = scePowerGetBatteryLifePercent();
+    int isCharging = scePowerIsBatteryCharging();
+
+    // UX0 space
+    int64_t freeUx0 = getFreeSpace("ux0:");
+    int64_t totalUx0 = getTotalSpace("ux0:");
+    float freeUx0GB = (float)freeUx0 / (1024.0f * 1024.0f * 1024.0f);
+    float totalUx0GB = (float)totalUx0 / (1024.0f * 1024.0f * 1024.0f);
+    
+    const char* ux0Label = isUx0Internal() ? "[INT]" : "[SD]";
+    
+    char ux0Text[64];
+    snprintf(ux0Text, sizeof(ux0Text), "ux0:%s %.1f/%.1fGB", ux0Label, freeUx0GB, totalUx0GB);
+
+    uint32_t colorUx0 = RGBA8(0, 255, 0, 255);
+    if (freeUx0GB < 0.5f)
+        colorUx0 = RGBA8(255, 0, 0, 255);
+    else if (freeUx0GB < 2.0f)
+        colorUx0 = RGBA8(255, 80, 0, 255);
+    else if (freeUx0GB < 5.0f)
+        colorUx0 = RGBA8(255, 165, 0, 255);
+    else if (freeUx0GB < 10.0f)
+        colorUx0 = RGBA8(255, 255, 0, 255);
+
+    char uma0Text[64] = {0};
+    uint32_t colorUma0 = RGBA8(0, 255, 0, 255);
+    int hasUma = hasUma0();
+    if (hasUma) {
+        int64_t freeUma0 = getFreeSpace("uma0:");
+        float freeUma0GB = (float)freeUma0 / (1024.0f * 1024.0f * 1024.0f);
+        snprintf(uma0Text, sizeof(uma0Text), "uma0:[SD] %.1fGB", freeUma0GB);
+        if (freeUma0GB < 0.5f)
+            colorUma0 = RGBA8(255, 0, 0, 255);
+        else if (freeUma0GB < 2.0f)
+            colorUma0 = RGBA8(255, 80, 0, 255);
+        else if (freeUma0GB < 5.0f)
+            colorUma0 = RGBA8(255, 165, 0, 255);
+        else if (freeUma0GB < 10.0f)
+            colorUma0 = RGBA8(255, 255, 0, 255);
+    }
+
+    char batteryText[64];
+    const char* chargeIcon = "";
+    uint32_t colorBattery;
+    if (isCharging) {
+        chargeIcon = "\xE2\x9A\xA1";
+        colorBattery = RGBA8(0, 200, 255, 255);
+    } else {
+        chargeIcon = "";
+        colorBattery = RGBA8(0, 255, 0, 255);
+    }
+    
+    if (!isCharging) {
+        if (batteryPercent <= 10)
+            colorBattery = RGBA8(255, 0, 0, 255);
+        else if (batteryPercent <= 20)
+            colorBattery = RGBA8(255, 80, 0, 255);
+        else if (batteryPercent <= 30)
+            colorBattery = RGBA8(255, 165, 0, 255);
+        else if (batteryPercent <= 50)
+            colorBattery = RGBA8(255, 255, 0, 255);
+    }
+    
+    snprintf(batteryText, sizeof(batteryText), "Battery: %d%% %s%s",
+             batteryPercent, chargeIcon, isCharging ? "(Charging)" : "");
+
+    int ux0Width = vita2d_pgf_text_width(pgf, 1.0f, ux0Text);
+    int uma0Width = (hasUma) ? vita2d_pgf_text_width(pgf, 1.0f, uma0Text) : 0;
+    int batteryWidth = vita2d_pgf_text_width(pgf, 1.0f, batteryText);
+
+    int right = 960;
+    int spacing = 10;
+
+    right -= batteryWidth;
+    vita2d_pgf_draw_text(pgf, right, 20, colorBattery, 1.0f, batteryText);
+
+    if (hasUma) {
+        right -= (ux0Width + spacing);
+        vita2d_pgf_draw_text(pgf, right, 20, colorUx0, 1.0f, ux0Text);
+        right -= (uma0Width + spacing);
+        vita2d_pgf_draw_text(pgf, right, 20, colorUma0, 1.0f, uma0Text);
+    } else {
+        right -= (ux0Width + spacing);
+        vita2d_pgf_draw_text(pgf, right, 20, colorUx0, 1.0f, ux0Text);
+    }
+}
+
 void drawLines() {
     for (int y = 0; y < 64; y++) {
         uint8_t alpha = (uint8_t)(255 * (1.0f - (float)y / 64.0f * 0.7f));
@@ -96,6 +186,8 @@ void drawLines() {
     vita2d_draw_line(0, 524, 0, 544, RGBA8(0x60, 0xA0, 0xFF, 255));
     vita2d_draw_line(940, 524, 960, 524, RGBA8(0x60, 0xA0, 0xFF, 255));
     vita2d_draw_line(960, 524, 960, 544, RGBA8(0x60, 0xA0, 0xFF, 255));
+
+    drawBatteryAndStorage();
 }
 
 #define MSG_MAX_LINES 8

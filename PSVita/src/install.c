@@ -32,15 +32,68 @@ static char* NeededDirectoriesARKX[] = {
     "ux0:pspemu/temp/game/PSP/LICENSE"
 };
 
+#define MIN_SPACE_NEEDED (100LL * 1024LL * 1024LL)
+
+int64_t getFreeSpace(const char* path) {
+    SceIoDevInfo info;
+    int res = sceIoDevctl(path, 0x3001, NULL, 0, &info, sizeof(info));
+    if (res < 0) return -1;
+    return (int64_t)info.free_size;
+}
+
+int64_t getTotalSpace(const char* path) {
+    SceIoDevInfo info;
+    int res = sceIoDevctl(path, 0x3001, NULL, 0, &info, sizeof(info));
+    if (res < 0) return -1;
+    return (int64_t)info.max_size;
+}
+
+int deviceExists(const char* path) {
+    SceIoDevInfo info;
+    return (sceIoDevctl(path, 0x3001, NULL, 0, &info, sizeof(info)) >= 0);
+}
+
+int isUx0Internal() {
+    int64_t ur0Total = getTotalSpace("ur0:");
+    int64_t ux0Total = getTotalSpace("ux0:");
+    if (ur0Total < 0 || ux0Total < 0) return 1;
+    return (ux0Total < 10LL * 1024LL * 1024LL * 1024LL);
+}
+
+int hasUma0(void) {
+    return deviceExists("uma0:");
+}
+
+int checkSpaceBeforeInstall(void) {
+    int64_t freeUx0 = getFreeSpace("ux0:");
+    
+    if (freeUx0 < 0) {
+        displayMsg("ERROR", "Cannot check free space on ux0:!");
+        sceKernelDelayThread(3000000);
+        return 1;
+    }
+    
+    if (freeUx0 < MIN_SPACE_NEEDED) {
+        char msg[128];
+        float freeGB = (float)freeUx0 / (1024.0f * 1024.0f * 1024.0f);
+        snprintf(msg, sizeof(msg), "Low space on ux0:\nOnly %.1f GB free\nNeed at least 100 MB.", freeGB);
+        displayMsg("WARNING", msg);
+        sceKernelDelayThread(5000000);
+        return 1;
+    }
+    
+    return 0;
+}
+
 int checkTaiConfig() {
     char c = 0;
     int fd = sceIoOpen("ur0:tai/config.txt", SCE_O_RDONLY, 0777);
-    if (fd < 0) return 1; // file doesn't exist, no need for \n
+    if (fd < 0) return 1; 
     SceIoStat stat;
     sceIoGetstatByFd(fd, &stat);
     if (stat.st_size == 0) {
         sceIoClose(fd);
-        return 1; // empty file, no need for \n
+        return 1; 
     }
     sceIoLseek(fd, -1, SCE_SEEK_END);
     sceIoRead(fd, &c, 1);
@@ -168,7 +221,6 @@ void placePspGameData(char *gameID) {
     char pbootFile[MAX_PATH] = {0};
     char rifFile[MAX_PATH] = {0};
 
-    // get path to EBOOT.PBP and PBOOT.PBP
     if(gameID != NULL) {
         snprintf(rifFile, MAX_PATH, "ux0:pspemu/temp/game/PSP/LICENSE/%s.rif", CONTENT_ID_ARK);
         snprintf(ebootFile, MAX_PATH, "ux0:pspemu/temp/game/PSP/GAME/%s/EBOOT.PBP", gameID);
@@ -194,7 +246,117 @@ void createBubble(char *gameID) {
         promoteCma("ux0:pspemu/temp/game", TITLE_ID, SCE_PKG_TYPE_PSP);
 }
 
+int hasExistingSaveData() {
+    char existingPath[MAX_PATH];
+    snprintf(existingPath, sizeof(existingPath), "ux0:/pspemu/PSP/SAVEDATA/ARK_01234");
+    
+    int dir = sceIoDopen(existingPath);
+    if (dir < 0) return 0;
+    
+    int hasFiles = 0;
+    SceIoDirent dent;
+    memset(&dent, 0, sizeof(dent));
+    while (sceIoDread(dir, &dent) > 0) {
+        if (strcmp(dent.d_name, ".") != 0 && strcmp(dent.d_name, "..") != 0) {
+            hasFiles = 1;
+            break;
+        }
+    }
+    sceIoDclose(dir);
+    
+    return hasFiles;
+}
+
+int askBackupSaveData() {
+    SceCtrlData pad;
+    
+    // Flush any stale input from menu selection
+    sceKernelDelayThread(200 * 1000);
+    for (int i = 0; i < 10; i++) {
+        sceCtrlPeekBufferPositive(0, &pad, 1);
+        sceKernelDelayThread(1000);
+    }
+    int backupSel = 0; 
+    
+    while (1) {
+        startDraw();
+        drawLines();
+
+        // Draw dialog box
+        vita2d_draw_rectangle(120, 140, 720, 180, RGBA8(0x20, 0x20, 0x40, 200));
+        vita2d_draw_line(120, 140, 840, 140, RGBA8(0x40, 0x80, 0xFF, 255));
+        vita2d_draw_line(120, 320, 840, 320, RGBA8(0x40, 0x80, 0xFF, 255));
+        vita2d_draw_line(120, 140, 120, 320, RGBA8(0x40, 0x80, 0xFF, 255));
+        vita2d_draw_line(840, 140, 840, 320, RGBA8(0x40, 0x80, 0xFF, 255));
+
+        drawTextCenterColored(180, "Existing save data found!", 0x40, 0x80, 0xFF);
+        drawTextCenterColored(215, "Backup before overwriting?", 255, 255, 255);
+        
+        int yesX = 300, noX = 580, y = 260;
+        
+        uint32_t selColor = RGBA8(255, 0, 0, 255);
+        uint32_t normColor = RGBA8(255, 255, 255, 255);
+        
+        // Read input
+        sceCtrlPeekBufferPositive(0, &pad, 1);
+        
+        if (pad.buttons & SCE_CTRL_LEFT) {
+            backupSel = 0;
+            sceKernelDelayThread(200 * 1000);
+        } else if (pad.buttons & SCE_CTRL_RIGHT) {
+            backupSel = 1;
+            sceKernelDelayThread(200 * 1000);
+        } else if (pad.buttons & SCE_CTRL_CROSS) {
+            sceKernelDelayThread(200 * 1000);
+            return (backupSel == 0) ? 1 : 0; 
+        }
+        
+        vita2d_pgf_draw_textf(uiGetFont(), yesX, y, (backupSel == 0) ? selColor : normColor, 1.0f, "  [ YES ]");
+        vita2d_pgf_draw_textf(uiGetFont(), noX, y, (backupSel == 1) ? selColor : normColor, 1.0f, "  [ NO ]");
+        
+        // Draw arrows around selected
+        if (backupSel == 0)
+            vita2d_pgf_draw_textf(uiGetFont(), yesX - 20, y, selColor, 1.0f, "→");
+        else
+            vita2d_pgf_draw_textf(uiGetFont(), noX - 20, y, selColor, 1.0f, "→");
+
+        endDraw();
+        sceKernelDelayThread(10000);
+    }
+}
+
+void backupSaveData() {
+    char backupPath[MAX_PATH];
+    snprintf(backupPath, sizeof(backupPath), "ux0:/pspemu/PSP/SAVEDATA/ARK_01234_BACKUP");
+    
+    sceIoRemove(backupPath);
+    
+    char existingPath[MAX_PATH];
+    snprintf(existingPath, sizeof(existingPath), "ux0:/pspemu/PSP/SAVEDATA/ARK_01234");
+    
+    startDraw();
+    drawLines();
+    vita2d_draw_rectangle(80, 160, 800, 100, RGBA8(0x15, 0x15, 0x30, 200));
+    vita2d_draw_line(80, 160, 880, 160, RGBA8(0x40, 0x80, 0xFF, 255));
+    vita2d_draw_line(80, 260, 880, 260, RGBA8(0x40, 0x80, 0xFF, 255));
+    vita2d_draw_line(80, 160, 80, 260, RGBA8(0x40, 0x80, 0xFF, 255));
+    vita2d_draw_line(880, 160, 880, 260, RGBA8(0x40, 0x80, 0xFF, 255));
+    drawTextCenterColored(190, "Backing up ...", 0x60, 0xA0, 0xFF);
+    drawTextCenterColored(230, "Backing up existing ARK save data...", 255, 255, 255);
+    endDraw();
+    
+    CopyTreeSilent(existingPath, backupPath);
+    
+    displayMsg("BACKUP", "Existing ARK save data\nbacked up to:\nARK_01234_BACKUP");
+    sceKernelDelayThread(3000000);
+}
+
 void copySaveFiles() {
+    if (hasExistingSaveData()) {
+        if (askBackupSaveData()) {
+            backupSaveData();
+        }
+    }
     sceIoMkdir("ux0:/pspemu/PSP/SAVEDATA/ARK_01234", 0006);
     CopyTree("app0:save/ARK_01234", "ux0:/pspemu/PSP/SAVEDATA/ARK_01234");
 }
@@ -213,14 +375,14 @@ void installARKXOnly() {
 
 void doInstall() {
     copySaveFiles();
-    installARK4Only();        // 
-    installARKXOnly();        // 
-    installAnalogPlugin();    // 
-    checkPS1Plugin();       // 
-    taiReloadConfig();        // 
+    installARK4Only();
+    installARKXOnly();
+    installAnalogPlugin();
+    checkPS1Plugin();
+    taiReloadConfig();
 }
 
 void taiReloadConfig(void) {
     updateUi("Reloading tai config...");
-    sceKernelDelayThread(1000000); // 1 second for visibility
+    sceKernelDelayThread(1000000); 
 }
