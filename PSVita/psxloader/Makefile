@@ -10,7 +10,7 @@ CFLAGS += -DDEBUG=1
 endif
 
 LDFLAGS = -nostartfiles
-LIBS = 
+LIBS = -lcolordebugger -ltinyfont -lpopsdisplay
 PSP_FW_VERSION=660
 
 BUILD_PRX=1

@@ -14,10 +14,26 @@
 #include <psppower.h>
 
 #include <systemctrl_ark.h>
+#include <colordebugger.h>
+#include <tinyfont.h>
+#include <popsdisplay.h>
 
 PSP_MODULE_INFO("ARK VitaPOPS Loader", 0, 1, 0);
 
+void printScreen(const char* text){
+    static int cur_y = 10;
+    tinyFontPrintTextScreenBuf(g_vram_base, msx, 10, cur_y, text, -1, NULL);
+    popsDisplaySoftRelocateVram(g_vram_base, NULL);
+    cur_y += 10;
+}
+
 int psxloader_thread(unsigned int argc, void* argv){
+
+    // initialize screen
+    colorDebug(0);
+    popsDisplayInit();
+
+    printScreen("ARK-X loader started!");
 
     // trigger virtual exploit in ps1cfw_enabler
     int res = sceIoOpen("ms0:/__dokxploit__", 0, 0);
@@ -27,6 +43,8 @@ int psxloader_thread(unsigned int argc, void* argv){
         return 0;
     }
 
+    printScreen("Opening ARKX.BIN");
+
     // open ARKX binloader
     SceUID fd = sceIoOpen(DEFAULT_ARK_PATH ARKX_BIN, PSP_O_RDONLY, 0);
 
@@ -35,10 +53,14 @@ int psxloader_thread(unsigned int argc, void* argv){
         return 0;
     }
 
+    printScreen("Reading ARKX.BIN into kram");
+
     // read binloader into KRAM at 0x88380000
     sceIoRead(fd, (void *)0x88380000, 0x80000);
     sceIoClose(fd);
     sceKernelDcacheWritebackAll();
+
+    printScreen("Executing ARKX.BIN");
 
     // execute main function
     int (*libctime)(u32, u32) = (void*)&sceKernelLibcTime;
