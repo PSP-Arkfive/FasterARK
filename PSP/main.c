@@ -57,7 +57,7 @@ int drawthread(SceSize args, void *argp){
         ya2d_clear_screen(CLEAR_COLOR);
         
         ya2d_draw_texture(background, 0, 0);
-        ya2d_draw_texture(icon, 0, 0);
+        ya2d_draw_texture(icon, 0, 272-icon->height);
 
         if (curtext){
             ya2d_draw_rect(100, 100, 8*strlen(curtext), 8, 0x8000ff00, 1);
