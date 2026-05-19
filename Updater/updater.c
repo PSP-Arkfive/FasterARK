@@ -10,6 +10,7 @@
 
 #include <cfwmacros.h>
 #include <kubridge.h>
+#include <bootloadex.h>
 #include <systemctrl.h>
 #include <systemctrl_se.h>
 #include <systemctrl_ark.h>
@@ -115,6 +116,16 @@ int psp_model = 0;
 int install_type = FULL_INSTALL;
 unsigned char buf[BUF_SIZE];
 
+u8 reboot150_header[REBOOT_HEADER_SIZE] = 
+{
+    REBOOT150_HEADER
+};
+
+u8 reboot661_header[REBOOT_HEADER_SIZE] = 
+{
+    REBOOT661_HEADER
+};
+
 
 void getArkConfig(){
     void* getArkConfig = NULL;
@@ -140,6 +151,36 @@ void open_flash(){
     while (sceIoAssign("flash1:", "lflash0:0,1", "flashfat1:", 0, NULL, 0)<0){
         sceKernelDelayThread(500000);
     }
+}
+
+void* read_file(const char* path, int* psize){
+    
+    SceUID fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
+    int size = sceIoLseek32(fd, 0, SEEK_END);
+    sceIoLseek32(fd, 0, SEEK_SET);
+    
+    void* buf = malloc(size);
+    if (!buf){
+        sceIoClose(fd);
+        return NULL;
+    }
+
+    int res = sceIoRead(fd, buf, size);
+    if (res != size){
+        free(buf);
+        sceIoClose(fd);
+        return NULL;
+    }
+
+    sceIoClose(fd);
+    *psize = size;
+    return buf;
+}
+
+void write_file(const char* path, void* buf, int size){
+    SceUID fd = sceIoOpen(path, PSP_O_WRONLY|PSP_O_TRUNC|PSP_O_CREAT, 0777);
+    sceIoWrite(fd, buf, size);
+    sceIoClose(fd);
 }
 
 void copy_file(char* orig, char* dest){
@@ -275,6 +316,17 @@ void extractArchive(int fdr, char* dest_path, int (*filter)(char*)){
     setInfoMsg(INFO_MSG, "Finished!");
 }
 
+u8 *FindRebootBinBuf(u8 *buf, u8 *header, unsigned int size)
+{
+    for (int i = 0; i < size - REBOOT_HEADER_SIZE; i++)
+    {
+        if (memcmp((void *)&buf[i], (void *)header, REBOOT_HEADER_SIZE) == 0)
+            return &buf[i];
+    }
+
+    return 0;
+}
+
 void doLiteInstall(){
     SceUID fd = sceIoOpen(eboot_path, PSP_O_RDONLY, 0777);
     sceIoLseek32(fd, pbp_header.psar_offset, PSP_SEEK_SET);
@@ -365,12 +417,53 @@ void installDCFiles(){
 }
 
 void installDC150Files(){
+
+    static const char* reboot150_path = ARK_DC_PATH_150 "/reboot150.prx"; // reboot150_header
+    static const char* systemctrl150_path = ARK_DC_PATH_150 "/kd/ark_systemctrl150.prx"; // reboot150_header & reboot661_header
+    
+    // backup old files
+    int size_reboot150_old, size_systemctrl150_old;
+    void* reboot150_old = read_file(reboot150_path, &size_reboot150_old);
+    void* systemctrl150_old = read_file(systemctrl150_path, &size_systemctrl150_old);
+
+    // extract archive
     char flash150_ark[ARK_PATH_SIZE];
     strcpy(flash150_ark, ark_config.arkpath);
     strcat(flash150_ark, FLASH150_ARK);
     SceUID fd = sceIoOpen(flash150_ark, PSP_O_RDONLY, 0777);
     extractArchive(fd, ARK_DC_PATH_150 "/", NULL);
     sceIoClose(fd);
+
+    int size_reboot150_new, size_systemctrl150_new;
+    void* reboot150_new = read_file(reboot150_path, &size_reboot150_new);
+    void* systemctrl150_new = read_file(systemctrl150_path, &size_systemctrl150_new);
+
+    // copy reboot buffer from old files to new files
+    memcpy(
+        FindRebootBinBuf(reboot150_new, reboot150_header, size_reboot150_new),
+        FindRebootBinBuf(reboot150_old, reboot150_header, size_reboot150_old),
+        REBOOT150_COMP_SIZE
+    );
+    memcpy(
+        FindRebootBinBuf(systemctrl150_new, reboot150_header, size_systemctrl150_new),
+        FindRebootBinBuf(systemctrl150_old, reboot150_header, size_systemctrl150_old),
+        REBOOT150_COMP_SIZE
+    );
+    memcpy(
+        FindRebootBinBuf(systemctrl150_new, reboot661_header, size_systemctrl150_new),
+        FindRebootBinBuf(systemctrl150_old, reboot661_header, size_systemctrl150_old),
+        REBOOT661_COMP_SIZE
+    );
+
+    // write-back
+    write_file(reboot150_path, reboot150_new, size_reboot150_new);
+    write_file(systemctrl150_path, systemctrl150_new, size_systemctrl150_new);
+
+    // free resources
+    free(reboot150_old);
+    free(reboot150_new);
+    free(systemctrl150_old);
+    free(systemctrl150_new);
 }
 
 void cleanupFilesPSP(){
