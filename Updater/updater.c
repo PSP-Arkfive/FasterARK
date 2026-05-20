@@ -53,6 +53,7 @@ char* savedata_files_full[] = {
     "UPDATER.TXT",
     "IDSREG.PRX",
     "USBDEV.PRX",
+    "IOP.PRX",
 };
 
 char* savedata_files_lite[] = {
