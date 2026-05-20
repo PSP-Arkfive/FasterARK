@@ -415,6 +415,17 @@ void installDCFiles(){
         setInfoMsg(INFO_MSG, flash_files[i].dest);
         copy_file(path, dest);
     }
+
+    // cleanup files from ARK_01234
+    fd = sceIoDopen(ARK_DC_PATH "/" DEFAULT_ARK_FOLDER);
+    SceIoDirent dit; memset(&dit, 0, sizeof(dit));
+    while (sceIoDread(fd, &dit) > 0){
+        if (dit.d_name[0] == '.' || strcmp(dit.d_name, ARK_SETTINGS) == 0) continue;
+        char path[ARK_PATH_SIZE];
+        strcpy(path, DEFAULT_ARK_PATH_DC);
+        strcat(path, dit.d_name);
+        sceIoRemove(path);
+    }
 }
 
 void installDC150Files(){
