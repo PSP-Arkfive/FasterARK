@@ -64,6 +64,7 @@ updater:
 	cp -r Resources/ARK_01234 Updater/Resources/
 	cp Resources/DC10/DC10.ARK Updater/Resources/ARK_01234/
 	cp Resources/ARK150on660/FLASH150.ARK Updater/Resources/ARK_01234/
+	cp Resources/ARK150on660/LANG150.ARK Updater/Resources/ARK_01234/
 	cp Resources/Extras/LANG.ARK Updater/Resources/ARK_01234/
 	cp Resources/Extras/VBOOT.PBP Updater/Resources/ARK_01234/
 	cp Resources/Extras/VSHMENU.PRX Updater/Resources/ARK_01234/
