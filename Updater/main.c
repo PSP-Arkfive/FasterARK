@@ -47,7 +47,7 @@ char header[64];
 
 void setInfoMsg(int type, char* txt){
     msg_type = type;
-    strcpy(msg, txt);
+    snprintf(msg, sizeof(msg), "%s", txt);
 }
 
 void ExitWithMessage(int type, int reboot, int milisecs, char *fmt, ...) 
