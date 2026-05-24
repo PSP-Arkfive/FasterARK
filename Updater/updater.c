@@ -33,6 +33,7 @@ char* savedata_files_full[] = {
     "FLASH150.ARK",
     "DC10.ARK",
     "LANG.ARK",
+    "LANG150.ARK",
     "THEME.ARK",
     "VBOOT.PBP",
     "VSHMENU.PRX",
@@ -69,6 +70,7 @@ char* savedata_files_lite[] = {
     "IDSREG.PRX",
     "USBDEV.PRX",
     "IOP.PRX",
+    "LANG150.ARK",
 };
 
 char* cleanup_files[] = {
@@ -76,6 +78,7 @@ char* cleanup_files[] = {
     "IDSREG.PRX",
     "USBDEV.PRX",
     "FLASH150.ARK",
+    "LANG150.ARK",
     "DC10.ARK",
     "XMBCTRL.PRX",
     "RECOVERY.PRX",
@@ -439,10 +442,10 @@ void installDC150Files(){
     void* systemctrl150_old = read_file(systemctrl150_path, &size_systemctrl150_old);
 
     // extract archive
-    char flash150_ark[ARK_PATH_SIZE];
-    strcpy(flash150_ark, ark_config.arkpath);
-    strcat(flash150_ark, FLASH150_ARK);
-    SceUID fd = sceIoOpen(flash150_ark, PSP_O_RDONLY, 0777);
+    char path[ARK_PATH_SIZE];
+    strcpy(path, ark_config.arkpath);
+    strcat(path, FLASH150_ARK);
+    SceUID fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
     extractArchive(fd, ARK_DC_PATH_150 "/", NULL);
     sceIoClose(fd);
 
@@ -476,6 +479,11 @@ void installDC150Files(){
     free(reboot150_new);
     free(systemctrl150_old);
     free(systemctrl150_new);
+
+    // copy language file
+    strcpy(path, ark_config.arkpath);
+    strcat(path, "LANG150.ARK");
+    copy_file(path, ARK_DC_PATH_150 "/LANG150.ARK");
 }
 
 void cleanupFilesPSP(){
