@@ -26,4 +26,4 @@ clean:
 	$(Q)rm -f *.elf *.prx *.o *.bin *.cue
 
 # To generate the EBOOT.PBP:
-# ChovySign-CLI --pops psxloader.cue --pops-info "ARK-X" ICON0.PNG --pops-eboot psxloader.prx --no-psvimg --nopspemudrm
+# ChovySign-CLI --pops psxloader.cue --pops-info "ARK-X" ICON0.PNG --pops-eboot psxloader.prx --no-psvimg --nopspemudrm EP0099-SCPS10084_00-CHOVYSIGN0000000
