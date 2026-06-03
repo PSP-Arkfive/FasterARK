@@ -1,4 +1,6 @@
-.PHONY: psp vita updater
+.PHONY: psp vita chovysign updater
+
+CHOVYSIGN = ./Resources/Chovy-Sign
 
 all: psp vita updater
 
@@ -57,6 +59,15 @@ vita:
 	cp PSVita/build/FasterARK.vpk dist/FasterARK_psvita.vpk
 	rm -rf PSVita/res/save/ARK_01234
 
+chovysign:
+#   Generate Chovy-Sign binaries
+	make -C PSVita/psxloader
+	make -C PSVita/psxloader/payload
+	$(CHOVYSIGN)/ChovySign-CLI --pops PSVita/psxloader/psxloader.cue --pops-info "ARK-X" PSVita/psxloader/ICON0.PNG --pops-eboot PSVita/psxloader/psxloader.prx --no-psvimg --nopspemudrm EP0099-SCPS10084_00-CHOVYSIGN0000000
+	cp PSVita/psxloader/payload/ARKX.BIN PSVita/res/psx/
+	cp $(CHOVYSIGN)/output/PSP/LICENSE/EP0099-SCPS10084_00-CHOVYSIGN0000000.rif PSVita/res/rif/psx.rif
+	cp $(CHOVYSIGN)/output/PSP/GAME/SCPS10084/EBOOT.PBP PSVita/res/psx/
+
 updater:
 #	Updater
 	mkdir -p dist/tmp/
@@ -80,5 +91,8 @@ updater:
 clean:
 	rm -rf dist
 	rm -rf PSVita/build
+	rm -rf $(CHOVYSIGN)/output
 	make -C PSP clean
 	make -C Updater clean
+	make -C PSVita/psxloader clean
+	make -C PSVita/psxloader/payload clean
