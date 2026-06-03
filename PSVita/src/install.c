@@ -224,7 +224,9 @@ void placePspGameData(char *gameID) {
     if(gameID != NULL) {
         snprintf(rifFile, MAX_PATH, "ux0:pspemu/temp/game/PSP/LICENSE/%s.rif", CONTENT_ID_ARK);
         snprintf(ebootFile, MAX_PATH, "ux0:pspemu/temp/game/PSP/GAME/%s/EBOOT.PBP", gameID);
+        snprintf(pbootFile, MAX_PATH, "ux0:pspemu/temp/game/PSP/GAME/%s/ARKX.BIN", gameID);
         CopyFileAndUpdateUi("app0:psx/EBOOT.PBP", ebootFile);
+        CopyFileAndUpdateUi("app0:psx/ARKX.BIN", pbootFile);
         CopyFileAndUpdateUi("app0:rif/psx.rif", rifFile);
     } else {
         snprintf(rifFile, MAX_PATH, "ux0:pspemu/temp/game/PSP/LICENSE/%s.rif", CONTENT_ID);

@@ -27,7 +27,7 @@ void printScreen(const char* text){
     cur_y += 10;
 }
 
-int psxloader_thread(unsigned int argc, void* argv){
+int psxloader_thread(unsigned int argc, void* argp){
 
     // initialize screen
     colorDebug(0);
@@ -45,8 +45,14 @@ int psxloader_thread(unsigned int argc, void* argv){
 
     printScreen("Opening ARKX.BIN");
 
+    char boot_path[256];
+    strncpy(boot_path, (const char*)argp, sizeof(boot_path));
+    char* last_trail = strrchr(boot_path, '/');
+    strcpy(last_trail+1, ARKX_BIN);
+
     // open ARKX binloader
-    SceUID fd = sceIoOpen(DEFAULT_ARK_PATH ARKX_BIN, PSP_O_RDONLY, 0);
+    SceUID fd = sceIoOpen(boot_path, PSP_O_RDONLY, 0);
+    if (fd < 0) fd = sceIoOpen(DEFAULT_ARK_PATH ARKX_BIN, PSP_O_RDONLY, 0);
 
     if (fd < 0){
         sceKernelExitGame();
@@ -74,7 +80,7 @@ int module_start(SceSize args, void* argp)
 
     // loader needs to be in a thread
     int thid = sceKernelCreateThread("psxloader", &psxloader_thread, 0x10, 0x20000, PSP_THREAD_ATTR_USER|PSP_THREAD_ATTR_VFPU, NULL);
-    sceKernelStartThread(thid, 0, NULL);
+    sceKernelStartThread(thid, args, argp);
 
     return 0;
 }
