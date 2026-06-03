@@ -234,7 +234,7 @@ void placePspGameData(char *gameID) {
         snprintf(pbootFile, MAX_PATH, "ux0:pspemu/temp/game/PSP/GAME/%s/PBOOT.PBP", TITLE_ID);
         CopyFileAndUpdateUi("app0:psp/EBOOT.PBP", ebootFile);
         CopyFileAndUpdateUi("app0:psp/PBOOT.PBP", pbootFile);
-        CopyFileAndUpdateUi("app0:rif/game.rif", rifFile);
+        CopyFileAndUpdateUi("app0:rif/psp.rif", rifFile);
     }
 
     genEbootSignature(ebootFile, gameID);

@@ -75,7 +75,7 @@ vita_create_vpk(${PROJECT_NAME}.vpk ${VITA_TITLEID} eboot.bin
   FILE sce_sys/livearea/contents/bg.png sce_sys/livearea/contents/bg.png
   FILE sce_sys/livearea/contents/template.xml sce_sys/livearea/contents/template.xml
   
-  FILE res/rif/game.rif rif/game.rif
+  FILE res/rif/psp.rif rif/psp.rif
   FILE res/rif/psx.rif rif/psx.rif
   FILE res/psp/EBOOT.PBP psp/EBOOT.PBP
   FILE res/psp/PBOOT.PBP psp/PBOOT.PBP
