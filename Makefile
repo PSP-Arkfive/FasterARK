@@ -57,8 +57,10 @@ vita:
 	$(CHOVYSIGN)/ChovySign-CLI --psp PSVita/psploader/eboot/psploader.iso --no-psvimg --nopspemudrm EP0099-NPUZ01234_00-CHOVYSIGN0000000
 	cp $(CHOVYSIGN)/output/PGAME/efcdab8967452301/NPUZ01234/PSP/LICENSE/EP0099-NPUZ01234_00-CHOVYSIGN0000000.rif PSVita/res/rif/psp.rif
 	cp $(CHOVYSIGN)/output/PGAME/efcdab8967452301/NPUZ01234/PSP/GAME/NPUZ01234/EBOOT.PBP PSVita/res/psp/
-#	pack-pbp PSVita/res/psp/PBOOT.PBP PSVita/psploader/PARAM.SFO PSVita/psploader/icon0.png NULL NULL NULL NULL PSVita/psploader/iso_files/psp_game/sysdir/eboot.bin NULL
-#	sign_np -pbp -c PSVita/psploader/psploader.iso PSVita/res/psp/PBOOT.PBP
+#	make -C PSVita/psploader/pboot
+#	sign_np -elf PSVita/psploader/pboot/psploader.prx PSVita/psploader/pboot/data.psp 2
+#	prxencrypter PSVita/psploader/pboot/psploader.prx 
+#	pack-pbp PSVita/res/psp/PBOOT.PBP PSVita/psploader/pboot/PARAM_PBOOT.SFO Resources/ARK_01234/ICON0.PNG NULL NULL NULL NULL PSVita/psploader/pboot/data.psp NULL
 	cp PSVita/psploader/pboot/PBOOT.PBP PSVita/res/psp/
 #   ePSX Bubble
 	make -C PSVita/psxloader
@@ -110,5 +112,6 @@ clean:
 	make -C PSP clean
 	make -C Updater clean
 	make -C PSVita/psploader/eboot clean
+	make -C PSVita/psploader/pboot clean
 	make -C PSVita/psxloader clean
 	make -C PSVita/psxloader/payload clean
