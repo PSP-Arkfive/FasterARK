@@ -1,14 +1,22 @@
-.PHONY: psp vita updater
+.PHONY: psp vita updater translations
 
 PY = $(shell which python3)
 PSPDEV = $(shell psp-config --pspdev-path)
 BUILDTOOLS = $(PSPDEV)/share/psp-cfw-sdk/build-tools
 CHOVYSIGNDIR = ./Resources/Chovy-Sign
 CHOVYSIGN = $(CHOVYSIGNDIR)/ChovySign-CLI
+LANGFOLDER = Resources/Language/Translations/resources
 
-all: psp vita updater
+all: translations psp vita updater
 
-psp:
+translations:
+	$(Q)$(PY) $(BUILDTOOLS)/pftools/bdf_to_pf.py $(LANGFOLDER)/satelite_chs_utf8.txt Resources/Language/quan.bdf $(LANGFOLDER)/satelite_chs.txt $(LANGFOLDER)/CHS.pf
+	$(Q)$(PY) $(BUILDTOOLS)/pftools/bdf_to_pf.py $(LANGFOLDER)/satelite_cht_utf8.txt Resources/Language/quan.bdf $(LANGFOLDER)/satelite_cht.txt $(LANGFOLDER)/CHT.pf
+	$(Q)$(PY) $(BUILDTOOLS)/pftools/bdf_to_pf.py $(LANGFOLDER)/satelite_jp_utf8.txt Resources/Language/quan.bdf $(LANGFOLDER)/satelite_jp.txt $(LANGFOLDER)/JP.pf
+	$(Q)$(PY) $(BUILDTOOLS)/pftools/bdf_to_pf.py $(LANGFOLDER)/satelite_kr_utf8.txt Resources/Language/quan.bdf $(LANGFOLDER)/satelite_kr.txt $(LANGFOLDER)/KR.pf
+	$(Q)$(PY) $(BUILDTOOLS)/pack/pkg-res.py Resources/Language LANG.ARK
+
+psp: translations
 	make -C PSP
 #	PSP Lite Install
 	mkdir -p dist/tmp/PSP/GAME/FasterARK/
@@ -27,6 +35,7 @@ psp:
 	mkdir -p dist/tmp/PSP/SAVEDATA/
 	cp -r Resources/ARK_01234 dist/tmp/PSP/SAVEDATA/
 	cp Resources/Extras/* dist/tmp/PSP/SAVEDATA/ARK_01234/
+	cp Resources/Language/Translations/LANG.ARK dist/tmp/PSP/SAVEDATA/ARK_01234/
 	cp -r Resources/CustomIPL dist/tmp/PSP/GAME/
 	cp -r Resources/DC10 dist/tmp/PSP/GAME/
 	cp -r Resources/ARK150on660 dist/tmp/PSP/GAME/
@@ -51,11 +60,12 @@ psp:
 	cd dist/tmp/ && zip -m -r FasterARK_psp_full.zip * && cd ../../ && mv dist/tmp/FasterARK_psp_full.zip dist/
 	rm -r dist/tmp/
 
-vita:
+vita: translations
 	mkdir -p dist
 	cp -r Resources/ARK_01234 PSVita/res/save/
 	cp -r Resources/Extras/* PSVita/res/save/ARK_01234/
 	cp -r Resources/PSVita/* PSVita/res/save/ARK_01234/
+	cp Resources/Language/Translations/LANG.ARK PSVita/res/save/ARK_01234/
 #   ePSP Bubble
 	make -C PSVita/loader/psp/eboot
 	cp Resources/ARK_01234/ICON0.PNG PSVita/loader/psp/eboot/iso_files/psp_game/
@@ -82,7 +92,7 @@ vita:
 	cd PSVita/build && cmake .. && make && cd ../../
 	cp PSVita/build/FasterARK.vpk dist/FasterARK_psvita.vpk
 
-updater:
+updater: translations
 #	Updater
 	mkdir -p dist/tmp/
 	cp -r Resources/LIBS Updater/Resources/
@@ -90,7 +100,7 @@ updater:
 	cp Resources/DC10/DC10.ARK Updater/Resources/ARK_01234/
 	cp Resources/ARK150on660/FLASH150.ARK Updater/Resources/ARK_01234/
 	cp Resources/ARK150on660/LANG150.ARK Updater/Resources/ARK_01234/
-	cp Resources/Extras/LANG.ARK Updater/Resources/ARK_01234/
+	cp Resources/Language/Translations/LANG.ARK Updater/Resources/ARK_01234/
 	cp Resources/Extras/VBOOT.PBP Updater/Resources/ARK_01234/
 	cp Resources/Extras/VSHMENU.PRX Updater/Resources/ARK_01234/
 	cp Resources/PSVita/XBOOT.PBP Updater/Resources/ARK_01234/
@@ -113,6 +123,7 @@ clean:
 	rm -f PSVita/res/rif/*
 	rm -rf PSVita/res/save/ARK_01234
 	rm -rf $(CHOVYSIGNDIR)/output
+	rm -f Resources/Language/Translations/LANG.ARK
 	rm -f PSVita/loader/psp/eboot/psploader.iso
 	rm -f PSVita/loader/psp/eboot/iso_files/psp_game/sysdir/*
 	make -C PSP clean
