@@ -101,69 +101,33 @@ int checkTaiConfig() {
     return (c == '\n');
 }
 
-int installAnalogPlugin() {
-    sceIoMkdir("ur0:tai", 0777);
-    updateUi("Checking for ARK Right Analog Plugin ...");
-    int pluginCheck = sceIoOpen("ur0:tai/arkrightanalog.suprx", SCE_O_RDONLY, 0777);
-    if(pluginCheck < 0) {
-        updateUi("ARK Right Analog Plugin not found adding to config ...");
-        CopyFileAndUpdateUi("app0:psp/arkrightanalog.suprx", "ur0:tai/arkrightanalog.suprx");
-        int hasNewLine = checkTaiConfig();
-        int addPlugin = sceIoOpen("ur0:tai/config.txt", SCE_O_CREAT | SCE_O_WRONLY | SCE_O_APPEND, 0777);
-        static char pluginLine[] = "# Add second analog support to ARK\n*NPUZ01234\nur0:tai/arkrightanalog.suprx";
-        if (!hasNewLine) sceIoWrite(addPlugin, "\n", 1);
-        sceIoWrite(addPlugin, pluginLine, sizeof(pluginLine)-1);
-        sceIoClose(addPlugin);
-        return 1;
-    }
-    else {
-        sceIoClose(pluginCheck);
-        updateUi("ARK Right Analog Plugin found updating plugin and base game only ...");
-        CopyFileAndUpdateUi("app0:psp/arkrightanalog.suprx", "ur0:tai/arkrightanalog.suprx");
-        return 0;
-    }
-}
+int checkPlugins() {
 
-int checkPS1Plugin() {
+    SceIoStat stat;
+
     // Check for old ARK-X PS1 plugin in ur0:tai and ux0:tai
-    int oldPluginUr0 = sceIoOpen("ur0:tai/ps1cfw_enabler.suprx", SCE_O_RDONLY, 0777);
-    int oldPluginUx0 = sceIoOpen("ux0:tai/ps1cfw_enabler.suprx", SCE_O_RDONLY, 0777);
-    int oldPluginFound = (oldPluginUr0 >= 0 || oldPluginUx0 >= 0);
-    if(oldPluginUr0 >= 0) sceIoClose(oldPluginUr0);
-    if(oldPluginUx0 >= 0) sceIoClose(oldPluginUx0);
+    int oldPs1PluginUr0 = sceIoGetstat("ur0:tai/ps1cfw_enabler.suprx", &stat);
+    int oldPs1PluginUx0 = sceIoGetstat("ux0:tai/ps1cfw_enabler.suprx", &stat);
+    int oldAnalogPluginUr0 = sceIoGetstat("ur0:tai/arkrightanalog.suprx", &stat);
+    int oldAnalogPluginUx0 = sceIoGetstat("ux0:tai/arkrightanalog.suprx", &stat);
+    int oldPluginFound = (oldPs1PluginUr0 >= 0 || oldPs1PluginUx0 >= 0 || oldAnalogPluginUr0 >= 0 || oldAnalogPluginUx0 >= 0);
     
     // Check for NoPspEmuDrm_mod in both ur0:tai and ux0:tai
-    int noPspEmuKern = sceIoOpen("ur0:tai/NoPspEmuDrm_kern.skprx", SCE_O_RDONLY, 0777);
-    int noPspEmuUser = sceIoOpen("ur0:tai/NoPspEmuDrm_user.suprx", SCE_O_RDONLY, 0777);
-    int noPspEmuKernUx = sceIoOpen("ux0:tai/NoPspEmuDrm_kern.skprx", SCE_O_RDONLY, 0777);
-    int noPspEmuUserUx = sceIoOpen("ux0:tai/NoPspEmuDrm_user.suprx", SCE_O_RDONLY, 0777);
-    int noPspEmuFound = (noPspEmuKern >= 0 || noPspEmuUser >= 0 || 
-                          noPspEmuKernUx >= 0 || noPspEmuUserUx >= 0);
-    int noPspEmuBothLocations = (noPspEmuKern >= 0 || noPspEmuUser >= 0) && 
-                                 (noPspEmuKernUx >= 0 || noPspEmuUserUx >= 0);
-    if(noPspEmuKern >= 0) sceIoClose(noPspEmuKern);
-    if(noPspEmuUser >= 0) sceIoClose(noPspEmuUser);
-    if(noPspEmuKernUx >= 0) sceIoClose(noPspEmuKernUx);
-    if(noPspEmuUserUx >= 0) sceIoClose(noPspEmuUserUx);
+    int noPspEmuKernMod = sceIoGetstat("ur0:tai/NoPspEmuDrm_kern_mod.skprx", &stat);
+    int noPspEmuUserMod = sceIoGetstat("ur0:tai/NoPspEmuDrm_user_mod.suprx", &stat);
+    int noPspEmuKernModUx = sceIoGetstat("ux0:tai/NoPspEmuDrm_kern_mod.skprx", &stat);
+    int noPspEmuUserModUx = sceIoGetstat("ux0:tai/NoPspEmuDrm_user_mod.suprx", &stat);
+    int noPspEmuModFound = (noPspEmuKernMod >= 0 || noPspEmuUserMod >= 0 || 
+                          noPspEmuKernModUx >= 0 || noPspEmuUserModUx >= 0);
     
     // Conflict detection: old plugin AND new one both present
-    if(oldPluginFound && noPspEmuFound) {
-        displayMsg("CONFLICT", "Both old PS1 plugin and\nNoPspEmuDrm_mod detected!\nRemove the old ps1cfw_enabler.suprx.");
-        sceKernelDelayThread(5000000);
-    }
-    else if(oldPluginFound) {
-        displayMsg("WARNING", "Old ARK-X PS1 Plugin found!\nIt is recommended to uninstall it\nand update to latest NoPspEmuDrm_mod.");
+    if (oldPluginFound && noPspEmuModFound) {
+        displayMsg("CONFLICT", "Old plugins and NoPspEmuDrm_mod detected!\nRemove old plugins (ps1cfw_enabler and arkrightanalog)\nto avoid potential conflicts.");
         sceKernelDelayThread(5000000);
     }
     
-    if(!noPspEmuFound) {
-        displayMsg("WARNING", "NoPspEmuDrm_mod not found!\nPlease install the latest\nNoPspEmuDrm_mod for PS1 support.");
-        sceKernelDelayThread(5000000);
-    }
-    
-    // Warn if files are in both ur0 and ux0 (should only be in one)
-    if(noPspEmuBothLocations) {
-        displayMsg("NOTE", "NoPspEmuDrm_mod found in both\nur0:tai/ and ux0:tai/!\nKeep only one copy to avoid issues.");
+    if (!noPspEmuModFound) {
+        displayMsg("WARNING", "NoPspEmuDrm_mod not found!\nPlease install the latest version.");
         sceKernelDelayThread(5000000);
     }
     
@@ -384,8 +348,7 @@ void doInstall() {
     copySaveFiles();
     installARK4Only();
     installARKXOnly();
-    installAnalogPlugin();
-    checkPS1Plugin();
+    checkPlugins();
     taiReloadConfig();
 }
 

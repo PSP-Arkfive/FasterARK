@@ -16,11 +16,9 @@ int main(int argc, const char *argv[]) {
     SceCtrlData pad;
     int selection = 0;
     const char *options[] = {
-        "Install ARK, ARK-X and Analog Plugin",
-        "Install ARK Only (No Plugins)",
-        "Install ARK and Analog Plugin",
+        "Install ARK and ARK-X",
+        "Install ARK Only",
         "Install ARK-X Only",
-        "Install Analog Plugin Only",
         "Install Savedata Only",
         "Exit"
     };
@@ -129,34 +127,20 @@ int main(int argc, const char *argv[]) {
             return 0;
 
         case 1:
-            displayMsg("Installing ARK", "Installing ARK only (no plugins)...");
+            displayMsg("Installing ARK", "Installing ARK only...");
             copySaveFiles();
             installARK4Only();
             break;
 
         case 2:
-            displayMsg("Installing ARK and Analog Plugin", "Installing ARK and analog plugin...");
+            displayMsg("Installing Only ARK-X", "Installing ARK-X Only...");
             copySaveFiles();
-            installARK4Only();
-            installAnalogPlugin();
+            installARKXOnly();
+            checkPlugins();
             taiReloadConfig();
             break;
 
         case 3:
-            displayMsg("Installing Only ARK-X", "Installing Only ARK-X...");
-            copySaveFiles();
-            installARKXOnly();
-            checkPS1Plugin();
-            taiReloadConfig();
-            break;
-
-        case 4:
-            displayMsg("Installing Analog Plugin", "Installing Analog plugin...");
-            installAnalogPlugin();
-            taiReloadConfig();
-            break;
-
-        case 5:
             displayMsg("Installing Savedata Folder", "Installing Savedata Folder...");
             copySaveFiles();
             taiReloadConfig();

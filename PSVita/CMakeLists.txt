@@ -79,7 +79,6 @@ vita_create_vpk(${PROJECT_NAME}.vpk ${VITA_TITLEID} eboot.bin
   FILE res/rif/psx.rif rif/psx.rif
   FILE res/psp/EBOOT.PBP psp/EBOOT.PBP
   FILE res/psp/PBOOT.PBP psp/PBOOT.PBP
-  FILE res/psp/arkrightanalog.suprx psp/arkrightanalog.suprx
   FILE res/psx/EBOOT.PBP psx/EBOOT.PBP
   FILE res/psx/ARKX.BIN psx/ARKX.BIN
   FILE res/save/ARK_01234/FLASH0.ARK save/ARK_01234/FLASH0.ARK
