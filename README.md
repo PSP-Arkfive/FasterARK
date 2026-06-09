@@ -23,6 +23,7 @@ The `Full` variant (`FasterARK_psp_full.zip`) contains the following extras:
 - `ARK-150 Addon`: Only usable on 1K, installs the full 1.50 ARK firmware on memory stick to dual boot with latest firmware (installation and usage: https://github.com/PSP-Arkfive/ARK-150).
  
 For new `PS Vita` users:
+- Requires the latest version of `NoPspEmuDrm_mod`: https://github.com/PSP-Arkfive/NoPspEmuDrmArkMod/releases/tag/2026-06-09
 - Download `FasterARK_psvita.vpk`
 - `Install` using VitaShell.
 - Run `FasterARK` and choose first option.
