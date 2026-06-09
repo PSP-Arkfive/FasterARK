@@ -1,7 +1,7 @@
 PSPSDK=$(shell psp-config --pspsdk-path)
 CFWSDK = $(PSPDEV)/share/psp-cfw-sdk
 INCDIR = $(PSPSDK)/include
-LIBS = -L $(PSPSDK)/lib -lpopsdisplay -lcolordebugger -ltinyfont -lpspexploit -lansic
+LIBS = -L $(PSPSDK)/lib -lpspexploit -lpopsdisplay -lansic
 TARGET = ARKX.BIN
 
 PYTHON=$(shell which python3)
@@ -10,7 +10,7 @@ all: pre-build $(TARGET)
 
 CFLAGS = -std=c99 -Wall -Os -G0 -fno-pic $(addprefix -I, $(INCDIR))
 
-C_OBJS = main.o vitaflash.o
+C_OBJS = main.o ../../vitaflash.o ../../reboot.o
 
 
 LINKFILE = link.l

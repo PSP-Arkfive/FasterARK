@@ -269,6 +269,11 @@ int hasExistingSaveData() {
     return hasFiles;
 }
 
+int hasExistingBackup() {
+    SceIoStat stat;
+    return sceIoGetstat("ux0:/pspemu/PSP/SAVEDATA/ARK_01234_BACKUP", &stat) >= 0;
+}
+
 int askBackupSaveData() {
     SceCtrlData pad;
     
@@ -354,7 +359,7 @@ void backupSaveData() {
 }
 
 void copySaveFiles() {
-    if (hasExistingSaveData()) {
+    if (hasExistingSaveData() && !hasExistingBackup()) {
         if (askBackupSaveData()) {
             backupSaveData();
         }

@@ -82,12 +82,8 @@ vita_create_vpk(${PROJECT_NAME}.vpk ${VITA_TITLEID} eboot.bin
   FILE res/psp/arkrightanalog.suprx psp/arkrightanalog.suprx
   FILE res/psx/EBOOT.PBP psx/EBOOT.PBP
   FILE res/psx/ARKX.BIN psx/ARKX.BIN
-  FILE res/save/ARK_01234/ARK.BIN save/ARK_01234/ARK.BIN
-  FILE res/save/ARK_01234/ARK4.BIN save/ARK_01234/ARK4.BIN
   FILE res/save/ARK_01234/FLASH0.ARK save/ARK_01234/FLASH0.ARK
-  FILE res/save/ARK_01234/H.BIN save/ARK_01234/H.BIN
   FILE res/save/ARK_01234/ICON0.PNG save/ARK_01234/ICON0.PNG
-  FILE res/save/ARK_01234/K.BIN save/ARK_01234/K.BIN
   FILE res/save/ARK_01234/LANG.ARK save/ARK_01234/LANG.ARK
   FILE res/save/ARK_01234/MEDIASYN.PRX save/ARK_01234/MEDIASYN.PRX
   FILE res/save/ARK_01234/PARAM.SFO save/ARK_01234/PARAM.SFO

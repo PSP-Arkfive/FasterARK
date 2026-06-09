@@ -49,24 +49,23 @@ psp:
 
 vita:
 #   ePSP Bubble
-	make -C PSVita/psploader/eboot
-	cp Resources/ARK_01234/ICON0.PNG PSVita/psploader/eboot/iso_files/psp_game/
+	make -C PSVita/loader/psp/eboot
+	cp Resources/ARK_01234/ICON0.PNG PSVita/loader/psp/eboot/iso_files/psp_game/
 	cp Resources/PSVita/arkrightanalog.suprx PSVita/res/psp/
-	cp PSVita/psploader/eboot/psploader.prx PSVita/psploader/eboot/iso_files/psp_game/sysdir/boot.bin
-	mkisofs -o PSVita/psploader/eboot/psploader.iso PSVita/psploader/eboot/iso_files/
-	$(CHOVYSIGN)/ChovySign-CLI --psp PSVita/psploader/eboot/psploader.iso --no-psvimg --nopspemudrm EP0099-NPUZ01234_00-CHOVYSIGN0000000
+	cp PSVita/loader/psp/eboot/psploader.prx PSVita/loader/psp/eboot/iso_files/psp_game/sysdir/boot.bin
+	mkisofs -o PSVita/loader/psp/eboot/psploader.iso PSVita/loader/psp/eboot/iso_files/
+	$(CHOVYSIGN)/ChovySign-CLI --psp PSVita/loader/psp/eboot/psploader.iso --no-psvimg --nopspemudrm EP0099-NPUZ01234_00-CHOVYSIGN0000000
 	cp $(CHOVYSIGN)/output/PGAME/efcdab8967452301/NPUZ01234/PSP/LICENSE/EP0099-NPUZ01234_00-CHOVYSIGN0000000.rif PSVita/res/rif/psp.rif
 	cp $(CHOVYSIGN)/output/PGAME/efcdab8967452301/NPUZ01234/PSP/GAME/NPUZ01234/EBOOT.PBP PSVita/res/psp/
-#	make -C PSVita/psploader/pboot
-#	sign_np -elf PSVita/psploader/pboot/psploader.prx PSVita/psploader/pboot/data.psp 2
-#	prxencrypter PSVita/psploader/pboot/psploader.prx 
-#	pack-pbp PSVita/res/psp/PBOOT.PBP PSVita/psploader/pboot/PARAM_PBOOT.SFO Resources/ARK_01234/ICON0.PNG NULL NULL NULL NULL PSVita/psploader/pboot/data.psp NULL
-	cp PSVita/psploader/pboot/PBOOT.PBP PSVita/res/psp/
+	make -C PSVita/loader/psp/pboot
+	make -C PSVita/loader/psp/PrxEncrypter
+	./PSVita/loader/psp/PrxEncrypter/prxencrypter PSVita/loader/psp/pboot/psploader.prx
+	pack-pbp PSVita/res/psp/PBOOT.PBP PSVita/loader/psp/pboot/PARAM_PBOOT.SFO Resources/ARK_01234/ICON0.PNG NULL NULL NULL NULL DATA.PSP NULL
 #   ePSX Bubble
-	make -C PSVita/psxloader
-	make -C PSVita/psxloader/payload
-	$(CHOVYSIGN)/ChovySign-CLI --pops PSVita/psxloader/psxloader.cue --pops-info "ARK-X" PSVita/psxloader/ICON0.PNG --pops-eboot PSVita/psxloader/psxloader.prx --no-psvimg --nopspemudrm EP0099-SCPS10084_00-CHOVYSIGN0000000
-	cp PSVita/psxloader/payload/ARKX.BIN PSVita/res/psx/
+	make -C PSVita/loader/psx
+	make -C PSVita/loader/psx/payload
+	$(CHOVYSIGN)/ChovySign-CLI --pops PSVita/loader/psx/psxloader.cue --pops-info "ARK-X" PSVita/loader/psx/ICON0.PNG --pops-eboot PSVita/loader/psx/psxloader.prx --no-psvimg --nopspemudrm EP0099-SCPS10084_00-CHOVYSIGN0000000
+	cp PSVita/loader/psx/payload/ARKX.BIN PSVita/res/psx/
 	cp $(CHOVYSIGN)/output/PSP/LICENSE/EP0099-SCPS10084_00-CHOVYSIGN0000000.rif PSVita/res/rif/psx.rif
 	cp $(CHOVYSIGN)/output/PSP/GAME/SCPS10084/EBOOT.PBP PSVita/res/psx/
 #	Installer
@@ -101,17 +100,19 @@ updater:
 
 clean:
 	rm -rf dist
+	rm -f DATA.PSP
 	rm -rf PSVita/build
 	rm -f PSVita/res/psp/*
 	rm -f PSVita/res/psx/*
 	rm -f PSVita/res/rif/*
 	rm -rf PSVita/res/save/ARK_01234
 	rm -rf $(CHOVYSIGN)/output
-	rm -f PSVita/psploader/eboot/psploader.iso
-	rm -f PSVita/psploader/eboot/iso_files/psp_game/sysdir/*
+	rm -f PSVita/loader/psp/eboot/psploader.iso
+	rm -f PSVita/loader/psp/eboot/iso_files/psp_game/sysdir/*
 	make -C PSP clean
 	make -C Updater clean
-	make -C PSVita/psploader/eboot clean
-	make -C PSVita/psploader/pboot clean
-	make -C PSVita/psxloader clean
-	make -C PSVita/psxloader/payload clean
+	make -C PSVita/loader/psp/eboot clean
+	make -C PSVita/loader/psp/pboot clean
+	make -C PSVita/loader/psp/PrxEncrypter clean
+	make -C PSVita/loader/psx clean
+	make -C PSVita/loader/psx/payload clean
