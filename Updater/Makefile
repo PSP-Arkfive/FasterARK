@@ -26,13 +26,13 @@ EXTRA_TARGETS = EBOOT.PBP
 PSP_EBOOT_PSAR = ARK_01234.PKG
 
 ARK_01234.PKG:
-	$(Q)$(PYTHON) $(BUILDTOOLS)/pack/pack.py -p ARK_01234.PKG packlist.txt -s
+	$(PYTHON) $(BUILDTOOLS)/pack/pack.py -p ARK_01234.PKG packlist.txt -s
 
 all: ARK_01234.PKG $(EXTRA_TARGETS)
-	$(Q)rm PARAM.SFO ARK_01234.PKG
+	rm PARAM.SFO ARK_01234.PKG
 
 PSPSDK=$(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak
 
 PARAM.SFO:
-	$(Q)cp PARAM_UPDATER.SFO PARAM.SFO
+	cp PARAM_UPDATER.SFO PARAM.SFO

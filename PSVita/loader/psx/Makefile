@@ -18,9 +18,9 @@ BUILD_PRX=1
 include $(PSPSDK)/lib/build.mak
 
 psxloader.cue:
-	$(Q)mkpsxiso psxloader.xml
+	mkpsxiso psxloader.xml
 
 main.c: psxloader.cue
 
 clean:
-	$(Q)rm -f *.elf *.prx *.o *.bin *.cue
+	rm -f *.elf *.prx *.o *.bin *.cue

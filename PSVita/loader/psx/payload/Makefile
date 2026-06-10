@@ -29,16 +29,16 @@ pre-build: link.l
 cmd_genlink = $(PYTHON) $(CFWSDK)/build-tools/genlink.py 0x88380000 exploitEntry > $(LINKFILE)
 
 link.l:
-	$(Q)$(cmd_genlink)
+	$(cmd_genlink)
 
 main.elf: $(C_OBJS)
 
 $(TARGET): main.elf
-	$(Q)$(STRIP) -s $<
-	$(Q)$(OBJCOPY) -O binary $< $@
+	$(STRIP) -s $<
+	$(OBJCOPY) -O binary $< $@
 	@echo GET $@
 
 clean:
-	$(Q)rm -rf *~ *.s *.o *.elf $(TARGET) exploit.h link.l
+	rm -rf *~ *.s *.o *.elf $(TARGET) exploit.h link.l
 
 include $(CFWSDK)/build-tools/beauty_bin.mak
