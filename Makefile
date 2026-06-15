@@ -82,9 +82,7 @@ vita: translations
 	cp $(CHOVYSIGNDIR)/output/PGAME/efcdab8967452301/NPUZ01234/PSP/LICENSE/EP0099-NPUZ01234_00-CHOVYSIGN0000000.rif PSVita/res/rif/psp.rif
 	cp $(CHOVYSIGNDIR)/output/PGAME/efcdab8967452301/NPUZ01234/PSP/GAME/NPUZ01234/EBOOT.PBP PSVita/res/psp/
 	make -C PSVita/loader/psp/pboot
-	make -C Resources/PrxEncrypter
-	./Resources/PrxEncrypter/prxencrypter PSVita/loader/psp/pboot/psploader.prx
-	pack-pbp PSVita/res/psp/PBOOT.PBP PSVita/loader/psp/pboot/PARAM_PBOOT.SFO Resources/ARK_01234/ICON0.PNG NULL NULL NULL NULL DATA.PSP NULL
+	cp PSVita/loader/psp/pboot/PBOOT.PBP PSVita/res/psp/
 	make -C Resources/Peops
 	$(PY) $(BUILDTOOLS)/gz/pspgz.py PSVita/res/save/ARK_01234/PS1SPU.PRX $(BUILDTOOLS)/gz/UserModule.hdr Resources/Peops/peops.prx peops 0x0000
 #   ePSX Bubble
@@ -123,7 +121,6 @@ updater: translations
 
 clean:
 	rm -rf dist
-	rm -f DATA.PSP
 	rm -rf PSVita/build
 	rm -f PSVita/res/psp/*
 	rm -f PSVita/res/psx/*
@@ -136,7 +133,6 @@ clean:
 	make -C PSP clean
 	make -C Updater clean
 	make -C Resources/Peops clean
-	make -C Resources/PrxEncrypter clean
 	make -C PSVita/loader/psp/eboot clean
 	make -C PSVita/loader/psp/pboot clean
 	make -C PSVita/loader/psx clean

@@ -16,6 +16,7 @@
 #include <systemctrl_ark.h>
 
 #include "main.h"
+#include "version.h"
 
 PSP_MODULE_INFO("ARKUpdater", 0x800, 1, 0);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_VSH | PSP_THREAD_ATTR_VFPU);
