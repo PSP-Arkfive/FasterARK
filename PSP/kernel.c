@@ -16,7 +16,7 @@ unsigned char buf[BUF_SIZE];
 
 extern int working ;
 extern char* curtext;
-extern KernelFunctions* k_tbl;
+extern KernelFunctions k_tbl;
 SceModule* loadexec = NULL;
 char* eboot_path = NULL;
 
@@ -39,29 +39,29 @@ int isVitaFile(char* filename){
 }
 
 void open_flash(){
-    while(k_tbl->IoUnassign("flash0:") < 0) {
-        k_tbl->KernelDelayThread(500000);
+    while(k_tbl.IoUnassign("flash0:") < 0) {
+        k_tbl.KernelDelayThread(500000);
     }
-    while (k_tbl->IoAssign("flash0:", "lflash0:0,0", "flashfat0:", 0, NULL, 0)<0){
-        k_tbl->KernelDelayThread(500000);
+    while (k_tbl.IoAssign("flash0:", "lflash0:0,0", "flashfat0:", 0, NULL, 0)<0){
+        k_tbl.KernelDelayThread(500000);
     }
 }
 
 int CopyFile(char* orig, char* dest){
-    int fdr = k_tbl->KernelIOOpen(orig, PSP_O_RDONLY, 0777);
+    int fdr = k_tbl.KernelIOOpen(orig, PSP_O_RDONLY, 0777);
     if (fdr < 0) return fdr;
-    int fdw = k_tbl->KernelIOOpen(dest, PSP_O_WRONLY|PSP_O_CREAT|PSP_O_TRUNC, 0777);
+    int fdw = k_tbl.KernelIOOpen(dest, PSP_O_WRONLY|PSP_O_CREAT|PSP_O_TRUNC, 0777);
     if (fdw < 0){
-        k_tbl->KernelIOClose(fdr);
+        k_tbl.KernelIOClose(fdr);
         return fdw;
     }
     while (1){
-        int read = k_tbl->KernelIORead(fdr, buf, BUF_SIZE);
+        int read = k_tbl.KernelIORead(fdr, buf, BUF_SIZE);
         if (read <= 0) break;
-        k_tbl->KernelIOWrite(fdw, buf, read);
+        k_tbl.KernelIOWrite(fdw, buf, read);
     }
-    k_tbl->KernelIOClose(fdr);
-    k_tbl->KernelIOClose(fdw);
+    k_tbl.KernelIOClose(fdr);
+    k_tbl.KernelIOClose(fdw);
     return 0;
 }
 
@@ -76,44 +76,44 @@ void extractFlash0Archive(char* archive, char* dest_path){
 
     if (strncmp(dest_path, "flash", 4) == 0) open_flash();
     
-    int fdr = k_tbl->KernelIOOpen(archive, PSP_O_RDONLY, 0777);
+    int fdr = k_tbl.KernelIOOpen(archive, PSP_O_RDONLY, 0777);
     
     if (fdr>=0){
         int filecount;
-        k_tbl->KernelIORead(fdr, &filecount, sizeof(filecount));
+        k_tbl.KernelIORead(fdr, &filecount, sizeof(filecount));
         for (int i=0; i<filecount; i++){
             filepath[path_len] = '\0';
             int filesize;
-            k_tbl->KernelIORead(fdr, &filesize, sizeof(filesize));
+            k_tbl.KernelIORead(fdr, &filesize, sizeof(filesize));
 
             char namelen;
-            k_tbl->KernelIORead(fdr, &namelen, sizeof(namelen));
+            k_tbl.KernelIORead(fdr, &namelen, sizeof(namelen));
 
-            k_tbl->KernelIORead(fdr, filename, namelen);
+            k_tbl.KernelIORead(fdr, filename, namelen);
             filename[namelen] = '\0';
             
             if (isVitaFile(filename)){ // check if file is not needed on PSP
-                k_tbl->KernelIOLSeek(fdr, filesize, 1); // skip file
+                k_tbl.KernelIOLSeek(fdr, filesize, 1); // skip file
             }
             else{
                 strcat(filepath, (filename[0]=='/')?filename+1:filename);
                 curtext = filepath;
-                int fdw = k_tbl->KernelIOOpen(filepath, PSP_O_WRONLY|PSP_O_CREAT|PSP_O_TRUNC, 0777);
+                int fdw = k_tbl.KernelIOOpen(filepath, PSP_O_WRONLY|PSP_O_CREAT|PSP_O_TRUNC, 0777);
                 if (fdw < 0){
                     curtext = "ERROR: could not open file for writing";
-                    k_tbl->KernelIOClose(fdr);
+                    k_tbl.KernelIOClose(fdr);
                     while(1){};
                     return;
                 }
                 while (filesize>0){
-                    int read = k_tbl->KernelIORead(fdr, buf, (filesize>BUF_SIZE)?BUF_SIZE:filesize);
-                    k_tbl->KernelIOWrite(fdw, buf, read);
+                    int read = k_tbl.KernelIORead(fdr, buf, (filesize>BUF_SIZE)?BUF_SIZE:filesize);
+                    k_tbl.KernelIOWrite(fdw, buf, read);
                     filesize -= read;
                 }
-                k_tbl->KernelIOClose(fdw);
+                k_tbl.KernelIOClose(fdw);
             }
         }
-        k_tbl->KernelIOClose(fdr);
+        k_tbl.KernelIOClose(fdr);
     }
     else{
         curtext = "Nothing to be done";
@@ -137,14 +137,14 @@ void copyLibraryFiles(){
     if (CopyFile(path, USBDEV_PRX_FLASH) < 0
             && CopyFile("ms0:/PSP/LIBS/usbdevice.prx", USBDEV_PRX_FLASH) < 0){
         curtext = "ERROR copying usbdevice.prx";
-        k_tbl->KernelDelayThread(4*1000*1000);
+        k_tbl.KernelDelayThread(4*1000*1000);
     }
 
     strcpy(filename, "idsregeneration.prx");
     if (CopyFile(path, IDSREG_PRX_FLASH) < 0
             && CopyFile("ms0:/PSP/LIBS/idsregeneration.prx", IDSREG_PRX_FLASH) < 0){
         curtext = "ERROR copying idsregeneration.prx";
-        k_tbl->KernelDelayThread(4*1000*1000);
+        k_tbl.KernelDelayThread(4*1000*1000);
     }
 }
 
@@ -153,7 +153,7 @@ int LoadReboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
     // Copy Rebootex into Memory
     memset((char *)REBOOTEX_TEXT, 0, REBOOTEX_MAX_SIZE);
     if (rebootbuffer_psp[0] == 0x1F && rebootbuffer_psp[1] == 0x8B) // gzip packed rebootex
-        k_tbl->KernelGzipDecompress((unsigned char *)REBOOTEX_TEXT, REBOOTEX_MAX_SIZE, rebootbuffer_psp, NULL);
+        k_tbl.KernelGzipDecompress((unsigned char *)REBOOTEX_TEXT, REBOOTEX_MAX_SIZE, rebootbuffer_psp, NULL);
     else // plain payload
         memcpy((void*)REBOOTEX_TEXT, rebootbuffer_psp, REBOOTEX_MAX_SIZE);
         
@@ -191,8 +191,8 @@ void cfwReboot(){
     }
 
     // Invalidate Cache
-    k_tbl->KernelDcacheWritebackInvalidateAll();
-    k_tbl->KernelIcacheInvalidateAll();
+    k_tbl.KernelDcacheWritebackInvalidateAll();
+    k_tbl.KernelIcacheInvalidateAll();
 }
 
 int kthread(SceSize args, void *argp){
@@ -204,7 +204,7 @@ int kthread(SceSize args, void *argp){
 
     for (int i=0; i<NELEMS(flash0_paths); i++){
         SceIoStat stat;
-        int res = k_tbl->KernelIOGetStat(flash0_paths[i], &stat);
+        int res = k_tbl.KernelIOGetStat(flash0_paths[i], &stat);
         if (res >= 0){
             extractFlash0Archive(flash0_paths[i], "flash0:/");
             copyLibraryFiles();
@@ -220,19 +220,27 @@ int kthread(SceSize args, void *argp){
 }
 
 void doKernelThread(){
-    SceUID kthreadID = k_tbl->KernelCreateThread("arkflasher", (void*)KERNELIFY(&kthread), 1, 0x20000, PSP_THREAD_ATTR_VFPU, NULL);
+    SceUID kthreadID = k_tbl.KernelCreateThread("arkflasher", (void*)KERNELIFY(&kthread), 1, 0x20000, PSP_THREAD_ATTR_VFPU, NULL);
     if (kthreadID >= 0){
         // start thread and wait for it to end
-        k_tbl->KernelStartThread(kthreadID, 0, NULL);
+        k_tbl.KernelStartThread(kthreadID, 0, NULL);
     }
 }
 
 void kmain(){
     int k1 = pspSdkSetK1(0);
     curtext = "Got Kernel Access!";
-    pspXploitScanKernelFunctions(k_tbl);
+    pspXploitScanKernelFunctions(&k_tbl);
     pspXploitRepairKernel();
-    doKernelThread();
-    curtext = "All Done!";
+
+    u32 (*getDevkitVersion)() = (void*)pspXploitFindFunction("sceSystemMemoryManager", "SysMemUserForUser", 0x3FC9AE6A);
+    if (getDevkitVersion() < FW_660){
+        curtext = "ERROR: requires Firmware 6.60 or 6.61";
+        k_tbl.KernelDelayThread(5000*1000);
+    }
+    else {
+        doKernelThread();
+        curtext = "All Done!";
+    }
     pspSdkSetK1(k1);
 }

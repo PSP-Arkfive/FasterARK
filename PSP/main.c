@@ -20,8 +20,8 @@ PSP_DISABLE_NEWLIB_TIMEZONE_SUPPORT();
 PSP_DISABLE_NEWLIB_CWD_SUPPORT();
 PSP_DISABLE_AUTOSTART_PTHREAD();
 
-static KernelFunctions _ktbl;
-KernelFunctions* k_tbl = &_ktbl;
+
+KernelFunctions k_tbl;
 
 #define CLEAR_COLOR 0x00000000
 #define WHITE_COLOR 0xFFFFFFFF
