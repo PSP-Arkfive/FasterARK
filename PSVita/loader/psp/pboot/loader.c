@@ -29,7 +29,7 @@ extern int reboot_launcher();
 
 void kmain(){
     pspSdkSetK1(0);
-    repairKernel();
+    pspXploitRepairKernel();
     pspXploitScanKernelFunctions(&k_tbl);
     patchKermitPeripheral();
     patchLoadExec();

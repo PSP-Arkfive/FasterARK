@@ -1,7 +1,7 @@
 PSPSDK = $(shell psp-config --pspsdk-path)
 
 TARGET = psploader
-OBJS = main.o kxploit.o loader.o ../../vitaflash.o ../../reboot.o stubs.o
+OBJS = main.o loader.o ../../vitaflash.o ../../reboot.o
 
 CFLAGS = -std=c99 -Os -G0 -Wall
 LDFLAGS =
