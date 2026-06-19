@@ -224,6 +224,7 @@ void doKernelThread(){
     if (kthreadID >= 0){
         // start thread and wait for it to end
         k_tbl.KernelStartThread(kthreadID, 0, NULL);
+        k_tbl.KernelWaitThreadEnd(kthreadID, NULL);
     }
 }
 

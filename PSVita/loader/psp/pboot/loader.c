@@ -6,7 +6,6 @@
 #include <colordebugger.h>
 #include <tinyfont.h>
 
-#include "kxploit.h"
 #include "payload.h"
 
 
