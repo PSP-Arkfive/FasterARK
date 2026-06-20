@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Dependencies
         run: |
-          sudo apt-get install clang automake autoconf zlib-dev python3 python3-pycryptodomex python3-ecdsa p7zip-full curl unzip sudo mkfsiso mkpsxiso
+          sudo apt-get install clang automake autoconf zlib1g-dev python3 python3-pycryptodome python3-ecdsa p7zip-full curl unzip sudo mkisofs
 
       - name: Getting lastest pspdev
         run: | 
@@ -65,11 +65,10 @@ jobs:
           export PATH=$VITASDK/bin:$PATH
           ./install-all.sh
 
-#      - name:  mkpsxiso ( alpine work around )
-#        run: |
-#          curl -OJL 'https://github.com/krazynez/mkpsxiso/releases/download/latest/mkpsxiso'
-#          sudo chmod 755 mkpsxiso
-#          sudo mv mkpsxiso /usr/local/bin/
+      - name:  mkpsxiso
+        run: |
+          curl -OJL 'https://github.com/Lameguy64/mkpsxiso/releases/download/v2.20/mkpsxiso-2.20-Linux.deb'
+          sudo apt-get install ./mkpsxiso-2.20-Linux.deb
 
       - name: Build
         run:  make clean && make 
