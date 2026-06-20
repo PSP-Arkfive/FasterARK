@@ -60,10 +60,9 @@ jobs:
 
       - name:  mkpsxiso ( alpine work around )
         run: |
-          curl -OJL 'https://github.com/Lameguy64/mkpsxiso/releases/download/v2.20/mkpsxiso-2.20-win64.zip'
-          unzip mkpsxiso-2.20-win64.zip
-          sudo cp mkpsxiso-2.20-win64/mkpsxiso.exe /usr/local/bin/
-          sed -i 's/mkpsxiso/WINPREFIX=FasterARK/prefix wine mkpsxiso.exe/g' PSVita/loader/psx/Makefile
+          curl -OJL 'https://github.com/krazynez/mkpsxiso/releases/download/latest/mkpsxiso'
+          sudo chmod 755 mkpsxiso
+          sudo mv mkpsxiso /usr/local/bin/
 
       - name: Build
         run:  make clean && make 
