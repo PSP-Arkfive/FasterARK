@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Dependencies
         run: |
-          apk add clang automake autoconf zlib-dev python3 py3-pycryptodomex py3-ecdsa zip curl unzip sudo cdrkit gcompat libc6-compat icu-libs
+          apk add clang automake autoconf zlib-dev python3 py3-pycryptodomex py3-ecdsa zip curl unzip sudo cdrkit gcompat libc6-compat icu-libs wine
 
       - name: Cloning and Building lastest pspsdk
         run: | 
@@ -57,6 +57,13 @@ jobs:
           export VITASDK=/usr/local/vitasdk
           export PATH=$VITASDK/bin:$PATH
           ./install-all.sh
+
+      - name:  mkpsxiso ( alpine work around )
+        run: |
+          curl -OJL 'https://github.com/Lameguy64/mkpsxiso/releases/download/v2.20/mkpsxiso-2.20-win64.zip'
+          unzip mkpsxiso-2.20-win64.zip
+          sudo cp mkpsxiso-2.20-win64/mkpsxiso.exe /usr/local/bin/
+          sed -i 's/mkpsxiso/wine mkpsxiso.exe/g' PSVita/loader/psx/Makefile
 
       - name: Build
         run:  make clean && make 
