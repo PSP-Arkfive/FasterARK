@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Dependencies
         run: |
-          apk add clang automake autoconf zlib-dev python3 py3-pycryptodomex py3-ecdsa zip curl unzip sudo cdrkit
+          apk add clang automake autoconf zlib-dev python3 py3-pycryptodomex py3-ecdsa zip curl unzip sudo cdrkit gcompat libc6-compat
 
       - name: Cloning and Building lastest pspsdk
         run: | 
