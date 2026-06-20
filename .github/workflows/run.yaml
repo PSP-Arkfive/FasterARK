@@ -63,7 +63,7 @@ jobs:
           curl -OJL 'https://github.com/Lameguy64/mkpsxiso/releases/download/v2.20/mkpsxiso-2.20-win64.zip'
           unzip mkpsxiso-2.20-win64.zip
           sudo cp mkpsxiso-2.20-win64/mkpsxiso.exe /usr/local/bin/
-          sed -i 's/mkpsxiso/wine mkpsxiso.exe/g' PSVita/loader/psx/Makefile
+          sed -i 's/mkpsxiso/WINPREFIX=FasterARK/prefix wine mkpsxiso.exe/g' PSVita/loader/psx/Makefile
 
       - name: Build
         run:  make clean && make 
