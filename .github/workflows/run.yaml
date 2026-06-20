@@ -52,9 +52,9 @@ jobs:
         working-directory: vdpm
         run: |
           ./bootstrap-vitasdk.sh
-          ./install-all.sh
           echo VITASDK=/usr/local/vitasdk >> $GITHUB_ENV
           echo PATH=$VITASDK/bin:$PATH >> $GITHUB_ENV
+          ./install-all.sh
 
       - name: Build
         run:  make clean && make 
