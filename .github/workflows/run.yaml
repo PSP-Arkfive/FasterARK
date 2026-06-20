@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Dependencies
         run: |
-          apt-get install clang automake autoconf zlib-dev python3 python3-pycryptodomex python3-ecdsa p7zip-full curl unzip sudo mkfsiso mkpsxiso
+          sudo apt-get install clang automake autoconf zlib-dev python3 python3-pycryptodomex python3-ecdsa p7zip-full curl unzip sudo mkfsiso mkpsxiso
 
       - name: Getting lastest pspdev
         run: | 
