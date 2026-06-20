@@ -1,0 +1,85 @@
+name: FasterARK
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: pspdev/pspdev
+    steps:
+      - name: Dependencies
+        run: |
+          apk add clang automake autoconf zlib-dev python3 py3-pycryptodomex py3-ecdsa zip curl unzip sudo
+
+      - name: Cloning and Building lastest pspsdk
+        run: | 
+          git clone https://github.com/pspdev/pspsdk
+
+      - name: Bootstrap sdk and build
+        working-directory: pspsdk
+        run: |
+          bash ./bootstrap
+          ./configure
+          make
+          make install
+
+      - name: ya2d via psp-pacman
+        run: |
+          psp-pacman -Syyu --noconfirm
+          psp-pacman -S ya2d --noconfirm
+
+      - name: Update psp-cfw-sdk
+        run: curl -OJL "https://github.com/pspdev/psp-cfw-sdk/releases/download/latest/psp-cfw-sdk.zip"
+      
+      - name: Extract psp-cfw-sdk
+        run: sudo unzip -o psp-cfw-sdk.zip -d /
+
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+
+      - name: Clone VitaSDK
+        run: |
+         git clone git clone https://github.com/vitasdk/vdpm
+
+
+      - name: Bootstrap VitaSDK
+        working-directory: vdpm
+        run: |
+          ./bootstrap-vitasdk.sh
+          ./install-all.sh
+          echo VITASDK=/usr/local/vitasdk >> $GITHUB_ENV
+          echo PATH=$VITASDK/bin:$PATH >> $GITHUB_ENV
+
+      - name: Build
+        run:  make clean && make 
+
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: FasterARK-release
+          path: dist/*
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v8
+        with:
+          name: FasterARK-release
+          path: dist/*.zip
+      - name:
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: latest
+          name: FasterARK pre-release
+          prerelease: true
+          files: dist/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

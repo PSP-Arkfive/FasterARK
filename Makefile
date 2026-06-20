@@ -69,6 +69,11 @@ psp: translations
 
 vita: translations
 	mkdir -p dist
+	mkdir -p PSVita/res/save
+	mkdir -p PSVita/loader/psp/eboot/iso_files/psp_game/sysdir
+	mkdir -p PSVita/res/psp/
+	mkdir -p PSVita/res/rif
+	mkdir -p PSVita/res/psx/
 	cp -r Resources/ARK_01234 PSVita/res/save/
 	cp -r Resources/Extras/* PSVita/res/save/ARK_01234/
 	cp -r Resources/PSVita/* PSVita/res/save/ARK_01234/
