@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Dependencies
         run: |
-          sudo apt-get git openssh install clang automake autoconf zlib1g-dev python3 python3-pycryptodome python3-ecdsa p7zip-full curl unzip sudo mkisofs
+          sudo apt-get intall git openssh clang automake autoconf zlib1g-dev python3 python3-pycryptodome python3-ecdsa p7zip-full curl unzip sudo mkisofs
 
       - name: Getting lastest pspdev
         run: | 
