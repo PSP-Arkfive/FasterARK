@@ -23,7 +23,7 @@ u8* rebootbuffer = rebootbuffer_vita;
 
 extern int patchKermitPeripheral();
 extern void patchLoadExec();
-extern int reboot_launcher();
+extern int rebootLauncher();
 
 
 void kmain(){
@@ -32,5 +32,5 @@ void kmain(){
     pspXploitScanKernelFunctions(&k_tbl);
     patchKermitPeripheral();
     patchLoadExec();
-    reboot_launcher();
+    rebootLauncher();
 }

@@ -35,7 +35,7 @@ u8* rebootbuffer = rebootbuffer_vitapops;
 
 extern int patchKermitPeripheral();
 extern void patchLoadExec();
-extern int reboot_launcher();
+extern int rebootLauncher();
 
 
 // Fake K1 Kernel Setting
@@ -101,7 +101,7 @@ int exploitEntry(){
     // patch and reboot
     patchKermitPeripheral();
     patchLoadExec();
-    reboot_launcher();
+    rebootLauncher();
 
     return 0;
 }

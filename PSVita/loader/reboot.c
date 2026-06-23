@@ -106,7 +106,7 @@ void patchLoadExec(){
 }
 
 // reboot to launcher
-int reboot_launcher(){
+int rebootLauncher(){
     static char menupath[ARK_PATH_SIZE];
     strcpy(menupath, ark_config.arkpath);
     strcat(menupath, ark_config.launcher);
