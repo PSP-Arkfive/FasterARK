@@ -91,8 +91,11 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           tag_name: latest
-          name: FasterARK pre-release
-          prerelease: true
-          files: dist/*.zip
+          name: FasterARK
+          prerelease: false
+          make_latest: true
+          files: |
+            **/*.zip
+            **/*.vpk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
