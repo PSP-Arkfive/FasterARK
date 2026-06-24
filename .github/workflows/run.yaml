@@ -92,7 +92,8 @@ jobs:
         with:
           tag_name: latest
           name: FasterARK pre-release
-          prerelease: true
+          prerelease: false
+          make_latest: true
           files: |
             **/*.zip
             **/*.vpk
