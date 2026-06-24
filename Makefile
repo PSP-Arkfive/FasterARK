@@ -93,8 +93,8 @@ vita: translations
 #   ePSX Bubble
 	make -C PSVita/loader/psx
 	make -C PSVita/loader/psx/payload
-	$(CHOVYSIGN) --pops PSVita/loader/psx/psxloader.cue --pops-info "ARK-X" PSVita/loader/psx/ICON0.PNG --pops-eboot PSVita/loader/psx/psxloader.prx --no-psvimg --nopspemudrm EP0099-SCPS10084_00-CHOVYSIGN0000000
 	cp PSVita/loader/psx/payload/ARKX.BIN PSVita/res/psx/
+	$(CHOVYSIGN) --pops PSVita/loader/psx/psxloader.cue --pops-info "ARK-X" PSVita/loader/psx/ICON0.PNG --pops-eboot PSVita/loader/psx/psxloader.prx --no-psvimg --nopspemudrm EP0099-SCPS10084_00-CHOVYSIGN0000000
 	cp $(CHOVYSIGNDIR)/output/PSP/LICENSE/EP0099-SCPS10084_00-CHOVYSIGN0000000.rif PSVita/res/rif/psx.rif
 	cp $(CHOVYSIGNDIR)/output/PSP/GAME/SCPS10084/EBOOT.PBP PSVita/res/psx/
 #	Installer
