@@ -91,7 +91,7 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           tag_name: latest
-          name: FasterARK pre-release
+          name: FasterARK
           prerelease: false
           make_latest: true
           files: |
