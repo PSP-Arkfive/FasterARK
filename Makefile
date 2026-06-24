@@ -84,8 +84,8 @@ vita: translations
 	cp PSVita/loader/psp/eboot/psploader.prx PSVita/loader/psp/eboot/iso_files/psp_game/sysdir/boot.bin
 	mkisofs -o PSVita/loader/psp/eboot/psploader.iso PSVita/loader/psp/eboot/iso_files/
 	$(CHOVYSIGN) --psp PSVita/loader/psp/eboot/psploader.iso --no-psvimg --nopspemudrm EP0099-NPUZ01234_00-CHOVYSIGN0000000
-	cp $(CHOVYSIGNDIR)/output/PGAME/efcdab8967452301/NPUZ01234/PSP/LICENSE/EP0099-NPUZ01234_00-CHOVYSIGN0000000.rif PSVita/res/rif/psp.rif
-	cp $(CHOVYSIGNDIR)/output/PGAME/efcdab8967452301/NPUZ01234/PSP/GAME/NPUZ01234/EBOOT.PBP PSVita/res/psp/
+	cp $(CHOVYSIGNDIR)/output/PGAME/efcdab8967452301/PSP/LICENSE/EP0099-NPUZ01234_00-CHOVYSIGN0000000.rif PSVita/res/rif/psp.rif
+	cp $(CHOVYSIGNDIR)/output/PGAME/efcdab8967452301/PSP/GAME/NPUZ01234/EBOOT.PBP PSVita/res/psp/
 	make -C PSVita/loader/psp/pboot
 	cp PSVita/loader/psp/pboot/PBOOT.PBP PSVita/res/psp/
 	make -C Resources/Peops
