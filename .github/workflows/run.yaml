@@ -93,6 +93,8 @@ jobs:
           tag_name: latest
           name: FasterARK pre-release
           prerelease: true
-          files: dist/*.zip
+          files: |
+            **/*.zip
+            **/*.vpk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
