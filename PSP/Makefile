@@ -15,6 +15,8 @@ EXTRA_TARGETS = EBOOT.PBP
 PSP_EBOOT_TITLE = PSP FasterARK
 PSP_EBOOT_ICON = res/icon0.png
 PSP_EBOOT_PIC1 = res/pic1.png
+PSP_EBOOT_ICON1 = res/icon1.pmf
+PSP_EBOOT_SND0 = res/snd0.at3
 
 LIBDIR = 
 LIBS = -lpspexploit -lya2d -ltinyfont -lpng -lz -lpspmath -lpspvram -lpspgum -lpspgu -lpsprtc
