@@ -80,7 +80,7 @@ vita: translations
 	cp Resources/Language/Translations/LANG.ARK PSVita/res/save/ARK_01234/
 #   ePSP Bubble
 	make -C PSVita/loader/psp/eboot
-	cp Resources/ARK_01234/ICON0.PNG PSVita/loader/psp/eboot/iso_files/psp_game/
+	cp PSP/res/icon0.png PSVita/loader/psp/eboot/iso_files/psp_game/ICON0.PNG
 	cp PSVita/loader/psp/eboot/psploader.prx PSVita/loader/psp/eboot/iso_files/psp_game/sysdir/boot.bin
 	mkisofs -o PSVita/loader/psp/eboot/psploader.iso PSVita/loader/psp/eboot/iso_files/
 	$(CHOVYSIGN) --psp PSVita/loader/psp/eboot/psploader.iso --no-psvimg --nopspemudrm EP0099-NPUZ01234_00-CHOVYSIGN0000000
