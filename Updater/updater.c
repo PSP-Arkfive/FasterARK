@@ -27,6 +27,9 @@ enum {
 
 char* savedata_files_full[] = {
     "ICON0.PNG",
+    "ICON1.PMF",
+    "PIC1.PNG",
+    "SND0.AT3",
     "PARAM.SFO",
     "SAVEDATA.BIN",
     "FLASH0.ARK",
