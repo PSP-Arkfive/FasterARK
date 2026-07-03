@@ -79,13 +79,14 @@ vita: translations
 	cp -r Resources/PSVita/* PSVita/res/save/ARK_01234/
 	cp Resources/Language/Translations/LANG.ARK PSVita/res/save/ARK_01234/
 #   ePSP Bubble
+	cp Resources/ARK_01234/ICON0.PNG PSVita/loader/psp/eboot/iso_files/psp_game/
 	make -C PSVita/loader/psp/eboot
-	cp PSP/res/icon0.png PSVita/loader/psp/eboot/iso_files/psp_game/ICON0.PNG
 	cp PSVita/loader/psp/eboot/psploader.prx PSVita/loader/psp/eboot/iso_files/psp_game/sysdir/boot.bin
 	mkisofs -o PSVita/loader/psp/eboot/psploader.iso PSVita/loader/psp/eboot/iso_files/
 	$(CHOVYSIGN) --psp PSVita/loader/psp/eboot/psploader.iso --no-psvimg --nopspemudrm EP0099-NPUZ01234_00-CHOVYSIGN0000000
 	cp $(CHOVYSIGNDIR)/output/PSP/LICENSE/EP0099-NPUZ01234_00-CHOVYSIGN0000000.rif PSVita/res/rif/psp.rif
 	cp $(CHOVYSIGNDIR)/output/PSP/GAME/NPUZ01234/EBOOT.PBP PSVita/res/psp/
+	cp Resources/ARK_01234/ICON0.PNG PSVita/loader/psp/pboot/
 	make -C PSVita/loader/psp/pboot
 	cp PSVita/loader/psp/pboot/PBOOT.PBP PSVita/res/psp/
 	make -C Resources/Peops
@@ -135,6 +136,8 @@ clean:
 	rm -f Resources/Language/Translations/LANG.ARK
 	rm -f PSVita/loader/psp/eboot/psploader.iso
 	rm -f PSVita/loader/psp/eboot/iso_files/psp_game/sysdir/*
+	rm -f PSVita/loader/psp/eboot/iso_files/psp_game/ICON0.PNG
+	rm -f PSVita/loader/psp/pboot/ICON0.PNG
 	make -C PSP clean
 	make -C Updater clean
 	make -C Resources/Peops clean
