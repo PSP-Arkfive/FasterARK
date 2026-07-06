@@ -112,7 +112,7 @@ int main(int argc, const char *argv[]) {
                 }
 
                 if (launch_sel == 0) {
-                    sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=NPUZ01234"); // ARK
+                    sceAppMgrLaunchAppByUri(0x20000, "psgm:play?titleid=NPUZ01234"); // ARK
                     sceKernelDelayThread(1000 * 1000);
                     sceKernelExitProcess(0);
                 } else if (launch_sel == 1){
@@ -129,13 +129,13 @@ int main(int argc, const char *argv[]) {
         case 1:
             displayMsg("Installing ARK", "Installing ARK only...");
             copySaveFiles();
-            installARK4Only();
+            installARK4Only(0);
             break;
 
         case 2:
             displayMsg("Installing Only ARK-X", "Installing ARK-X Only...");
             copySaveFiles();
-            installARKXOnly();
+            installARKXOnly(0);
             checkPlugins();
             taiReloadConfig();
             break;
@@ -151,8 +151,8 @@ int main(int argc, const char *argv[]) {
             return 0;
     }
 
-    if (selection == 4 || selection == 5) {
-        // For "Install Only Analog Plugin", don't launch since ARK may not be installed
+    if (selection == 3) {
+        // For "Install Savedata Only", don't launch since no bubble is installed
         vita2d_start_drawing();
         vita2d_clear_screen();
         vita2d_pgf_draw_textf(uiGetFont(), 20, 100, RGBA8(255, 255, 255, 255), 1.0f, "Installation complete!");
@@ -169,9 +169,6 @@ int main(int argc, const char *argv[]) {
             launch_opts[0] = "Launch ARK";
             num_launch = 1;
         } else if (selection == 2) {
-            launch_opts[0] = "Launch ARK";
-            num_launch = 1;
-        } else if (selection == 3) {
             launch_opts[0] = "Launch ARK-X";
             num_launch = 1;
         }
@@ -209,14 +206,14 @@ int main(int argc, const char *argv[]) {
             }
         }
         if (num_launch == 1) {
-            if (selection == 1 || selection == 2) {
-                sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=NPUZ01234"); // ARK
-            } else if (selection == 3) {
+            if (selection == 1) {
+                sceAppMgrLaunchAppByUri(0x20000, "psgm:play?titleid=NPUZ01234"); // ARK
+            } else if (selection == 2) {
                 sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=SCPS10084"); // ARK-X
             }
         } else if (num_launch == 2) {
             if (launch_sel == 0) {
-                sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=NPUZ01234"); // ARK
+                sceAppMgrLaunchAppByUri(0x20000, "psgm:play?titleid=NPUZ01234"); // ARK
             } else {
                 sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=SCPS10084"); // ARK-X
             }

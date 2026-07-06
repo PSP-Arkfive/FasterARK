@@ -332,22 +332,138 @@ void copySaveFiles() {
     CopyTree("app0:save/ARK_01234", "ux0:/pspemu/PSP/SAVEDATA/ARK_01234");
 }
 
-void installARK4Only() {
+int isInstalled(const char *titleid) {
+    char path[256];
+    snprintf(path, sizeof(path), "ux0:pspemu/PSP/GAME/%s", titleid);
+    SceIoStat stat;
+    return (sceIoGetstat(path, &stat) >= 0);
+}
+
+int askReinstallSingle(const char* name) {
+    SceCtrlData pad;
+    sceKernelDelayThread(200 * 1000);
+    for (int i = 0; i < 10; i++) {
+        sceCtrlPeekBufferPositive(0, &pad, 1);
+        sceKernelDelayThread(1000);
+    }
+    int reinstallSel = 1; 
+    char line1[256];
+    snprintf(line1, sizeof(line1), "%s is already installed!", name);
+    while (1) {
+        startDraw();
+        drawLines();
+        vita2d_draw_rectangle(120, 140, 720, 180, RGBA8(0x20, 0x20, 0x40, 200));
+        vita2d_draw_line(120, 140, 840, 140, RGBA8(0x40, 0x80, 0xFF, 255));
+        vita2d_draw_line(120, 320, 840, 320, RGBA8(0x40, 0x80, 0xFF, 255));
+        vita2d_draw_line(120, 140, 120, 320, RGBA8(0x40, 0x80, 0xFF, 255));
+        vita2d_draw_line(840, 140, 840, 320, RGBA8(0x40, 0x80, 0xFF, 255));
+        drawTextCenterColored(180, line1, 0x40, 0x80, 0xFF);
+        drawTextCenterColored(215, "Do you want to reinstall it?", 255, 255, 255);
+        int yesX = 300, noX = 580, y = 260;
+        uint32_t selColor = RGBA8(255, 0, 0, 255);
+        uint32_t normColor = RGBA8(255, 255, 255, 255);
+        sceCtrlPeekBufferPositive(0, &pad, 1);
+        if (pad.buttons & SCE_CTRL_LEFT) {
+            reinstallSel = 0;
+            sceKernelDelayThread(200 * 1000);
+        } else if (pad.buttons & SCE_CTRL_RIGHT) {
+            reinstallSel = 1;
+            sceKernelDelayThread(200 * 1000);
+        } else if (pad.buttons & SCE_CTRL_CROSS) {
+            sceKernelDelayThread(200 * 1000);
+            return (reinstallSel == 0) ? 1 : 0;
+        }
+        vita2d_pgf_draw_textf(uiGetFont(), yesX, y, (reinstallSel == 0) ? selColor : normColor, 1.0f, "  [ YES ]");
+        vita2d_pgf_draw_textf(uiGetFont(), noX, y, (reinstallSel == 1) ? selColor : normColor, 1.0f, "  [ NO ]");
+        if (reinstallSel == 0)
+            vita2d_pgf_draw_textf(uiGetFont(), yesX - 20, y, selColor, 1.0f, "→");
+        else
+            vita2d_pgf_draw_textf(uiGetFont(), noX - 20, y, selColor, 1.0f, "→");
+        endDraw();
+        sceKernelDelayThread(10000);
+    }
+}
+
+void installARK4Only(int force) {
+    if (!force && isInstalled("NPUZ01234")) {
+        if (askReinstallSingle("ARK") == 0) {
+            sceKernelExitProcess(0);
+        }
+    }
     createPspEmuDirectories(0);
     placePspGameData(NULL);
     createBubble(NULL);
 }
 
-void installARKXOnly() {
+void installARKXOnly(int force) {
+    if (!force && isInstalled("SCPS10084")) {
+        if (askReinstallSingle("ARK-X") == 0) {
+            sceKernelExitProcess(0);
+        }
+    }
     createPspEmuDirectories(1);
     placePspGameData("SCPS10084");
     createBubble("SCPS10084");
 }
 
+int areBothInstalled() {
+    SceIoStat stat1, stat2;
+    return (sceIoGetstat("ux0:pspemu/PSP/GAME/NPUZ01234", &stat1) >= 0 && 
+            sceIoGetstat("ux0:pspemu/PSP/GAME/SCPS10084", &stat2) >= 0);
+}
+
+int askReinstall() {
+    SceCtrlData pad;
+    sceKernelDelayThread(200 * 1000);
+    for (int i = 0; i < 10; i++) {
+        sceCtrlPeekBufferPositive(0, &pad, 1);
+        sceKernelDelayThread(1000);
+    }
+    int reinstallSel = 1; 
+    while (1) {
+        startDraw();
+        drawLines();
+        vita2d_draw_rectangle(120, 140, 720, 180, RGBA8(0x20, 0x20, 0x40, 200));
+        vita2d_draw_line(120, 140, 840, 140, RGBA8(0x40, 0x80, 0xFF, 255));
+        vita2d_draw_line(120, 320, 840, 320, RGBA8(0x40, 0x80, 0xFF, 255));
+        vita2d_draw_line(120, 140, 120, 320, RGBA8(0x40, 0x80, 0xFF, 255));
+        vita2d_draw_line(840, 140, 840, 320, RGBA8(0x40, 0x80, 0xFF, 255));
+        drawTextCenterColored(180, "ARK and ARK-X are already installed!", 0x40, 0x80, 0xFF);
+        drawTextCenterColored(215, "Do you want to reinstall them?", 255, 255, 255);
+        int yesX = 300, noX = 580, y = 260;
+        uint32_t selColor = RGBA8(255, 0, 0, 255);
+        uint32_t normColor = RGBA8(255, 255, 255, 255);
+        sceCtrlPeekBufferPositive(0, &pad, 1);
+        if (pad.buttons & SCE_CTRL_LEFT) {
+            reinstallSel = 0;
+            sceKernelDelayThread(200 * 1000);
+        } else if (pad.buttons & SCE_CTRL_RIGHT) {
+            reinstallSel = 1;
+            sceKernelDelayThread(200 * 1000);
+        } else if (pad.buttons & SCE_CTRL_CROSS) {
+            sceKernelDelayThread(200 * 1000);
+            return (reinstallSel == 0) ? 1 : 0;
+        }
+        vita2d_pgf_draw_textf(uiGetFont(), yesX, y, (reinstallSel == 0) ? selColor : normColor, 1.0f, "  [ YES ]");
+        vita2d_pgf_draw_textf(uiGetFont(), noX, y, (reinstallSel == 1) ? selColor : normColor, 1.0f, "  [ NO ]");
+        if (reinstallSel == 0)
+            vita2d_pgf_draw_textf(uiGetFont(), yesX - 20, y, selColor, 1.0f, "→");
+        else
+            vita2d_pgf_draw_textf(uiGetFont(), noX - 20, y, selColor, 1.0f, "→");
+        endDraw();
+        sceKernelDelayThread(10000);
+    }
+}
+
 void doInstall() {
+    if (areBothInstalled()) {
+        if (askReinstall() == 0) {
+            sceKernelExitProcess(0);
+        }
+    }
     copySaveFiles();
-    installARK4Only();
-    installARKXOnly();
+    installARK4Only(1);
+    installARKXOnly(1);
     checkPlugins();
     taiReloadConfig();
 }

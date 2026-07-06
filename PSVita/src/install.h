@@ -16,8 +16,8 @@ void createBubble(char* gameID);
 void copySaveFiles();
 
 void doInstall(void);
-void installARK4Only(void);
-void installARKXOnly(void);
+void installARK4Only(int force);
+void installARKXOnly(int force);
 
 int checkPlugins(void);
 void taiReloadConfig(void);
