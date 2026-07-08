@@ -68,10 +68,18 @@ int main(int argc, const char *argv[]) {
 
     switch (selection) {
         case 0:
-            displayMsg("Installing ARK and ARK-X", "Installing full package...");
-            doInstall();
-
             {
+                displayMsg("Installing ARK and ARK-X", "Installing full package...");
+                int mode = 2;
+                if (isEitherInstalled()) {
+                    int choice = askReinstallAndBackup("ARK and ARK-X");
+                    if (choice == 2) {
+                        sceKernelExitProcess(0);
+                    }
+                    mode = choice;
+                }
+                doInstall(mode);
+
                 const char *launch_options[] = { "Launch ARK", "Launch ARK-X", "Exit" };
                 int launch_sel = 0;
                 int launch_num = sizeof(launch_options) / sizeof(launch_options[0]);
@@ -80,7 +88,6 @@ int main(int argc, const char *argv[]) {
                     startDraw();
                     drawLines();
 
-                    // Draw launch box
                     vita2d_draw_rectangle(100, 120, 760, 200, RGBA8(0x20, 0x20, 0x40, 180));
                     vita2d_draw_line(100, 120, 860, 120, RGBA8(0x40, 0x80, 0xFF, 255));
                     vita2d_draw_line(100, 320, 860, 320, RGBA8(0x40, 0x80, 0xFF, 255));
@@ -112,11 +119,11 @@ int main(int argc, const char *argv[]) {
                 }
 
                 if (launch_sel == 0) {
-                    sceAppMgrLaunchAppByUri(0x20000, "psgm:play?titleid=NPUZ01234"); // ARK
+                    sceAppMgrLaunchAppByUri(0x20000, "psgm:play?titleid=NPUZ01234");
                     sceKernelDelayThread(1000 * 1000);
                     sceKernelExitProcess(0);
                 } else if (launch_sel == 1){
-                    sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=SCPS10084"); // ARK-X
+                    sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=SCPS10084");
                     sceKernelDelayThread(1000 * 1000);
                     sceKernelExitProcess(0);
                 }
@@ -127,22 +134,42 @@ int main(int argc, const char *argv[]) {
             return 0;
 
         case 1:
-            displayMsg("Installing ARK", "Installing ARK only...");
-            copySaveFiles();
-            installARK4Only(0);
+            {
+                displayMsg("Installing ARK", "Installing ARK only...");
+                int mode = 2;
+                if (isInstalled("NPUZ01234")) {
+                    int choice = askReinstallAndBackup("ARK");
+                    if (choice == 2) {
+                        sceKernelExitProcess(0);
+                    }
+                    mode = choice;
+                }
+                copySaveFiles(mode);
+                installARK4Only(1);
+            }
             break;
 
         case 2:
-            displayMsg("Installing Only ARK-X", "Installing ARK-X Only...");
-            copySaveFiles();
-            installARKXOnly(0);
-            checkPlugins();
-            taiReloadConfig();
+            {
+                displayMsg("Installing Only ARK-X", "Installing ARK-X Only...");
+                int mode = 2;
+                if (isInstalled("SCPS10084")) {
+                    int choice = askReinstallAndBackup("ARK-X");
+                    if (choice == 2) {
+                        sceKernelExitProcess(0);
+                    }
+                    mode = choice;
+                }
+                copySaveFiles(mode);
+                installARKXOnly(1);
+                checkPlugins();
+                taiReloadConfig();
+            }
             break;
 
         case 3:
             displayMsg("Installing Savedata Folder", "Installing Savedata Folder...");
-            copySaveFiles();
+            copySaveFiles(2);
             taiReloadConfig();
             break;
 

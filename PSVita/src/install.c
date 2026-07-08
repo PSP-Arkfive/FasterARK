@@ -320,12 +320,16 @@ void backupSaveData() {
     
     displayMsg("BACKUP", "Existing ARK save data\nbacked up to:\nARK_01234_BACKUP");
     sceKernelDelayThread(3000000);
-}
-
-void copySaveFiles() {
-    if (hasExistingSaveData() && !hasExistingBackup()) {
-        if (askBackupSaveData()) {
+}void copySaveFiles(int backupMode) {
+    if (backupMode == 1) {
+        if (hasExistingSaveData()) {
             backupSaveData();
+        }
+    } else if (backupMode == 2) {
+        if (hasExistingSaveData() && !hasExistingBackup()) {
+            if (askBackupSaveData()) {
+                backupSaveData();
+            }
         }
     }
     sceIoMkdir("ux0:/pspemu/PSP/SAVEDATA/ARK_01234", 0006);
@@ -339,46 +343,55 @@ int isInstalled(const char *titleid) {
     return (sceIoGetstat(path, &stat) >= 0);
 }
 
-int askReinstallSingle(const char* name) {
+int isEitherInstalled() {
+    SceIoStat stat1, stat2;
+    return (sceIoGetstat("ux0:pspemu/PSP/GAME/NPUZ01234", &stat1) >= 0 || 
+            sceIoGetstat("ux0:pspemu/PSP/GAME/SCPS10084", &stat2) >= 0);
+}
+
+int askReinstallAndBackup(const char* name) {
     SceCtrlData pad;
     sceKernelDelayThread(200 * 1000);
     for (int i = 0; i < 10; i++) {
         sceCtrlPeekBufferPositive(0, &pad, 1);
         sceKernelDelayThread(1000);
     }
-    int reinstallSel = 1; 
+    int reinstallSel = 2; 
     char line1[256];
     snprintf(line1, sizeof(line1), "%s is already installed!", name);
     while (1) {
         startDraw();
         drawLines();
-        vita2d_draw_rectangle(120, 140, 720, 180, RGBA8(0x20, 0x20, 0x40, 200));
-        vita2d_draw_line(120, 140, 840, 140, RGBA8(0x40, 0x80, 0xFF, 255));
-        vita2d_draw_line(120, 320, 840, 320, RGBA8(0x40, 0x80, 0xFF, 255));
-        vita2d_draw_line(120, 140, 120, 320, RGBA8(0x40, 0x80, 0xFF, 255));
-        vita2d_draw_line(840, 140, 840, 320, RGBA8(0x40, 0x80, 0xFF, 255));
-        drawTextCenterColored(180, line1, 0x40, 0x80, 0xFF);
-        drawTextCenterColored(215, "Do you want to reinstall it?", 255, 255, 255);
-        int yesX = 300, noX = 580, y = 260;
+        vita2d_draw_rectangle(80, 130, 800, 200, RGBA8(0x20, 0x20, 0x40, 200));
+        vita2d_draw_line(80, 130, 880, 130, RGBA8(0x40, 0x80, 0xFF, 255));
+        vita2d_draw_line(80, 330, 880, 330, RGBA8(0x40, 0x80, 0xFF, 255));
+        vita2d_draw_line(80, 130, 80, 330, RGBA8(0x40, 0x80, 0xFF, 255));
+        vita2d_draw_line(880, 130, 880, 330, RGBA8(0x40, 0x80, 0xFF, 255));
+        drawTextCenterColored(165, line1, 0x40, 0x80, 0xFF);
+        drawTextCenterColored(195, "Select installation option:", 255, 255, 255);
+        int opt1X = 140, opt2X = 350, opt3X = 700, y = 260;
         uint32_t selColor = RGBA8(255, 0, 0, 255);
         uint32_t normColor = RGBA8(255, 255, 255, 255);
         sceCtrlPeekBufferPositive(0, &pad, 1);
         if (pad.buttons & SCE_CTRL_LEFT) {
-            reinstallSel = 0;
+            reinstallSel = (reinstallSel - 1 + 3) % 3;
             sceKernelDelayThread(200 * 1000);
         } else if (pad.buttons & SCE_CTRL_RIGHT) {
-            reinstallSel = 1;
+            reinstallSel = (reinstallSel + 1) % 3;
             sceKernelDelayThread(200 * 1000);
         } else if (pad.buttons & SCE_CTRL_CROSS) {
             sceKernelDelayThread(200 * 1000);
-            return (reinstallSel == 0) ? 1 : 0;
+            return reinstallSel; 
         }
-        vita2d_pgf_draw_textf(uiGetFont(), yesX, y, (reinstallSel == 0) ? selColor : normColor, 1.0f, "  [ YES ]");
-        vita2d_pgf_draw_textf(uiGetFont(), noX, y, (reinstallSel == 1) ? selColor : normColor, 1.0f, "  [ NO ]");
+        vita2d_pgf_draw_textf(uiGetFont(), opt1X, y, (reinstallSel == 0) ? selColor : normColor, 1.0f, "  [ YES ]");
+        vita2d_pgf_draw_textf(uiGetFont(), opt2X, y, (reinstallSel == 1) ? selColor : normColor, 1.0f, "  [ YES & BACKUP ]");
+        vita2d_pgf_draw_textf(uiGetFont(), opt3X, y, (reinstallSel == 2) ? selColor : normColor, 1.0f, "  [ NO ]");
         if (reinstallSel == 0)
-            vita2d_pgf_draw_textf(uiGetFont(), yesX - 20, y, selColor, 1.0f, "→");
+            vita2d_pgf_draw_textf(uiGetFont(), opt1X - 20, y, selColor, 1.0f, "→");
+        else if (reinstallSel == 1)
+            vita2d_pgf_draw_textf(uiGetFont(), opt2X - 20, y, selColor, 1.0f, "→");
         else
-            vita2d_pgf_draw_textf(uiGetFont(), noX - 20, y, selColor, 1.0f, "→");
+            vita2d_pgf_draw_textf(uiGetFont(), opt3X - 20, y, selColor, 1.0f, "→");
         endDraw();
         sceKernelDelayThread(10000);
     }
@@ -386,9 +399,11 @@ int askReinstallSingle(const char* name) {
 
 void installARK4Only(int force) {
     if (!force && isInstalled("NPUZ01234")) {
-        if (askReinstallSingle("ARK") == 0) {
+        int choice = askReinstallAndBackup("ARK");
+        if (choice == 2) {
             sceKernelExitProcess(0);
         }
+        copySaveFiles(choice);
     }
     createPspEmuDirectories(0);
     placePspGameData(NULL);
@@ -397,71 +412,19 @@ void installARK4Only(int force) {
 
 void installARKXOnly(int force) {
     if (!force && isInstalled("SCPS10084")) {
-        if (askReinstallSingle("ARK-X") == 0) {
+        int choice = askReinstallAndBackup("ARK-X");
+        if (choice == 2) {
             sceKernelExitProcess(0);
         }
+        copySaveFiles(choice);
     }
     createPspEmuDirectories(1);
     placePspGameData("SCPS10084");
     createBubble("SCPS10084");
 }
 
-int areBothInstalled() {
-    SceIoStat stat1, stat2;
-    return (sceIoGetstat("ux0:pspemu/PSP/GAME/NPUZ01234", &stat1) >= 0 && 
-            sceIoGetstat("ux0:pspemu/PSP/GAME/SCPS10084", &stat2) >= 0);
-}
-
-int askReinstall() {
-    SceCtrlData pad;
-    sceKernelDelayThread(200 * 1000);
-    for (int i = 0; i < 10; i++) {
-        sceCtrlPeekBufferPositive(0, &pad, 1);
-        sceKernelDelayThread(1000);
-    }
-    int reinstallSel = 1; 
-    while (1) {
-        startDraw();
-        drawLines();
-        vita2d_draw_rectangle(120, 140, 720, 180, RGBA8(0x20, 0x20, 0x40, 200));
-        vita2d_draw_line(120, 140, 840, 140, RGBA8(0x40, 0x80, 0xFF, 255));
-        vita2d_draw_line(120, 320, 840, 320, RGBA8(0x40, 0x80, 0xFF, 255));
-        vita2d_draw_line(120, 140, 120, 320, RGBA8(0x40, 0x80, 0xFF, 255));
-        vita2d_draw_line(840, 140, 840, 320, RGBA8(0x40, 0x80, 0xFF, 255));
-        drawTextCenterColored(180, "ARK and ARK-X are already installed!", 0x40, 0x80, 0xFF);
-        drawTextCenterColored(215, "Do you want to reinstall them?", 255, 255, 255);
-        int yesX = 300, noX = 580, y = 260;
-        uint32_t selColor = RGBA8(255, 0, 0, 255);
-        uint32_t normColor = RGBA8(255, 255, 255, 255);
-        sceCtrlPeekBufferPositive(0, &pad, 1);
-        if (pad.buttons & SCE_CTRL_LEFT) {
-            reinstallSel = 0;
-            sceKernelDelayThread(200 * 1000);
-        } else if (pad.buttons & SCE_CTRL_RIGHT) {
-            reinstallSel = 1;
-            sceKernelDelayThread(200 * 1000);
-        } else if (pad.buttons & SCE_CTRL_CROSS) {
-            sceKernelDelayThread(200 * 1000);
-            return (reinstallSel == 0) ? 1 : 0;
-        }
-        vita2d_pgf_draw_textf(uiGetFont(), yesX, y, (reinstallSel == 0) ? selColor : normColor, 1.0f, "  [ YES ]");
-        vita2d_pgf_draw_textf(uiGetFont(), noX, y, (reinstallSel == 1) ? selColor : normColor, 1.0f, "  [ NO ]");
-        if (reinstallSel == 0)
-            vita2d_pgf_draw_textf(uiGetFont(), yesX - 20, y, selColor, 1.0f, "→");
-        else
-            vita2d_pgf_draw_textf(uiGetFont(), noX - 20, y, selColor, 1.0f, "→");
-        endDraw();
-        sceKernelDelayThread(10000);
-    }
-}
-
-void doInstall() {
-    if (areBothInstalled()) {
-        if (askReinstall() == 0) {
-            sceKernelExitProcess(0);
-        }
-    }
-    copySaveFiles();
+void doInstall(int backupMode) {
+    copySaveFiles(backupMode);
     installARK4Only(1);
     installARKXOnly(1);
     checkPlugins();

@@ -13,11 +13,14 @@ size_t GetTotalNeededDirectories(int _ARK_X);
 void createPspEmuDirectories(int _ARK_X);
 void placePspGameData(char* gameID);
 void createBubble(char* gameID);
-void copySaveFiles();
+void copySaveFiles(int backupMode);
 
-void doInstall(void);
+void doInstall(int backupMode);
 void installARK4Only(int force);
 void installARKXOnly(int force);
+int isInstalled(const char *titleid);
+int isEitherInstalled(void);
+int askReinstallAndBackup(const char* name);
 
 int checkPlugins(void);
 void taiReloadConfig(void);
