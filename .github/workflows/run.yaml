@@ -62,6 +62,7 @@ jobs:
           echo PATH=$VITASDK/bin:$PATH >> $GITHUB_ENV
           export VITASDK=/usr/local/vitasdk
           export PATH=$VITASDK/bin:$PATH
+          sudo apt purge zlib1g-dev -y
           ./bootstrap-vitasdk.sh
           ./install-all.sh
 
