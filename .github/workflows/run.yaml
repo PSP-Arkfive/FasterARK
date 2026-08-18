@@ -59,7 +59,7 @@ jobs:
         working-directory: vdpm
         run: |
           sudo apt-get update
-          sudo apt-get install zlib -y
+          sudo apt-get install zlib1g-dev -y
           ./bootstrap-vitasdk.sh
           echo VITASDK=/usr/local/vitasdk >> $GITHUB_ENV
           echo PATH=$VITASDK/bin:$PATH >> $GITHUB_ENV
