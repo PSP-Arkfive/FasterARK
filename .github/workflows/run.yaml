@@ -67,10 +67,10 @@ jobs:
           export PATH=$VITASDK/bin:$PATH
           ./bootstrap-vitasdk.sh
           export VDPM_PACMAN="$VITASDK/libexec/vdpm/pacman"
-          export VDPM_NONINTERACTIVE=1
           test -x "$VDPM_PACMAN"
           sed -i 's/box2d//g' include/install-packages.sh
-          ./install-all.sh
+          set +o pipefail
+          yes | ./install-all.sh
 
       - name:  mkpsxiso
         run: |
