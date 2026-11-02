@@ -68,7 +68,11 @@ jobs:
           ./bootstrap-vitasdk.sh
           export VDPM_PACMAN="$VITASDK/libexec/vdpm/pacman"
           test -x "$VDPM_PACMAN"
-          sed -i 's/box2d//g' include/install-packages.sh
+          sed -i \
+            -e '/^[[:space:]]*box2d[[:space:]]*$/d' \
+            -e '/^[[:space:]]*openal-soft[[:space:]]*$/d' \
+            -e '/^[[:space:]]*openssl[[:space:]]*$/d' \
+            include/install-packages.sh
           set +o pipefail
           yes | ./install-all.sh
 
