@@ -61,13 +61,16 @@ jobs:
       - name: Bootstrap VitaSDK
         working-directory: vdpm
         run: |
-          echo VITASDK=/usr/local/vitasdk >> $GITHUB_ENV
-          echo PATH=$VITASDK/bin:$PATH >> $GITHUB_ENV
+          echo "VITASDK=/usr/local/vitasdk" >> "$GITHUB_ENV"
+          echo "/usr/local/vitasdk/bin" >> "$GITHUB_PATH"
           export VITASDK=/usr/local/vitasdk
           export PATH=$VITASDK/bin:$PATH
           ./bootstrap-vitasdk.sh
-          sed -i 's/Box2D//g' include/install-packages.sh
-          yes | ./install-all.sh
+          export VDPM_PACMAN="$VITASDK/libexec/vdpm/pacman"
+          export VDPM_NONINTERACTIVE=1
+          test -x "$VDPM_PACMAN"
+          sed -i 's/box2d//g' include/install-packages.sh
+          ./install-all.sh
 
       - name:  mkpsxiso
         run: |
