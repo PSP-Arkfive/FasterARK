@@ -1,6 +1,3 @@
-# Building from source
-The top-level `Makefile` downloads the required assets from the latest ARK-5, ARK-150, CustomIPL, Launcher-Menus, PSP dynamic-libraries, and DC10 releases into `tmp/`. Run `make clean` to remove these temporary downloads. Building requires network access, `curl`, and `unzip`.
-
 # Variants
 The `Full` variant (`FasterARK_psp_full.zip`) contains the following extras:
 - `DC10`: ultimate recovery tool for PSP (installation and usage: https://github.com/PSP-Arkfive/Despertar-Del-Cementerio).
@@ -46,5 +43,4 @@ For new `PS Vita` users:
 
 
 # Building from source
-The top-level `Makefile` downloads the latest ARK-5, ARK-150, CustomIPL, Launcher-Menus, and PSP dynamic libraries release ZIPs and extracts their required assets into `tmp/` when needed.
-The temporary downloads are removed by `make clean`. Building therefore requires network access, `curl`, and `unzip`.
+The top-level `Makefile` downloads the required assets from the latest ARK-5, ARK-150, CustomIPL, Launcher-Menus, PSP dynamic-libraries, and DC10 releases into `tmp/`. Run `make clean` to remove these temporary downloads. Building requires network access, `curl`, and `unzip`.
