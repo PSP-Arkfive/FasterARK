@@ -262,6 +262,7 @@ int filter_savedata_lite_install(char* filename){
 }
 
 int filter_savedata_full_install(char* filename){
+    if (strcmp(filename, "VBOOT.PBP") == 0) filename = "THEME.ARK"; // update Custom Launcher only if it's ARK's
     for (int i=0; i<NELEMS(savedata_files_full); i++){
         if (strcmp(filename, savedata_files_full[i]) == 0){
             SceIoStat stat;
