@@ -181,7 +181,7 @@ void FeedXA(xa_decode_t *xap)
          vr+=(gauss[vl+1]*gvalr(1))&~2047;
          vr+=(gauss[vl+2]*gvalr(2))&~2047;
          vr+=(gauss[vl+3]*gvalr(3))&~2047;
-         l |= vr << 5;
+         l |= (uint32_t)vr << 5;
         }
        else
         {
@@ -202,7 +202,7 @@ void FeedXA(xa_decode_t *xap)
        l2=(l2*iPlace)/iSize;
        if(l2<-32767) l2=-32767;
        if(l2> 32767) l2=32767;
-       l=(l1&0xffff)|(l2<<16);
+       l=(uint32_t)(l1&0xffff)|((uint32_t)(l2&0xffff)<<16);
 
        *XAFeed++=l;
 
@@ -240,7 +240,7 @@ void FeedXA(xa_decode_t *xap)
          vr+=(gauss[vl+1]*gvalr(1))&~2047;
          vr+=(gauss[vl+2]*gvalr(2))&~2047;
          vr+=(gauss[vl+3]*gvalr(3))&~2047;
-         l |= vr << 5;
+         l |= (uint32_t)vr << 5;
         }
        else
         {
@@ -303,7 +303,7 @@ void FeedXA(xa_decode_t *xap)
        l1=(l1*iPlace)/iSize;
        if(l1<-32767) l1=-32767;
        if(l1> 32767) l1=32767;
-       l=(l1&0xffff)|(l1<<16);
+       l=(uint32_t)(l1&0xffff)|((uint32_t)(l1&0xffff)<<16);
        *XAFeed++=l;
 
        if(XAFeed==XAEnd) XAFeed=XAStart;
@@ -346,7 +346,7 @@ void FeedXA(xa_decode_t *xap)
          l=s;
         }
 
-       *XAFeed++=(l|(l<<16));
+       *XAFeed++=(l|((uint32_t)l<<16));
 
        if(XAFeed==XAEnd) XAFeed=XAStart;
        if(XAFeed==XAPlay) 
@@ -367,7 +367,9 @@ void FeedXA(xa_decode_t *xap)
 
 void FeedCDDA(unsigned char *pcm, int nBytes)
 {
- while(nBytes>0)
+ if(!bSPUIsOpen || !CDDAFeed || !CDDAPlay || !CDDAEnd) return;
+
+ while(nBytes>=4)
   {
    if(CDDAFeed==CDDAEnd) CDDAFeed=CDDAStart;
    while(CDDAFeed==CDDAPlay-1||
@@ -375,7 +377,8 @@ void FeedCDDA(unsigned char *pcm, int nBytes)
    {
     return;
    }
-   *CDDAFeed++=(*pcm | (*(pcm+1)<<8) | (*(pcm+2)<<16) | (*(pcm+3)<<24));
+   *CDDAFeed++=((uint32_t)pcm[0] | ((uint32_t)pcm[1]<<8) |
+                ((uint32_t)pcm[2]<<16) | ((uint32_t)pcm[3]<<24));
    nBytes-=4;
    pcm+=4;
   }

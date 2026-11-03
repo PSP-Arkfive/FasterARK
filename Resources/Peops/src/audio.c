@@ -35,6 +35,12 @@ static void FillAudio(unsigned char *stream, int len)
 {
     short *p = (short *)stream;
 
+    if(pSndBuffer == NULL)
+    {
+        memset(stream, 0, len);
+        return;
+    }
+
     len /= sizeof(short);
 
     while(iReadPos != iWritePos && len > 0)
@@ -65,43 +71,75 @@ int audio_thread(SceSize args, void *argp)
     return 0;
 }
 
-void SetupSound(void)
+int SetupSound(void)
 {
-    if(pSndBuffer != NULL) return;
-
-    channel = sceAudioChReserve(PSP_AUDIO_NEXT_CHANNEL, PSP_NUM_AUDIO_SAMPLES, PSP_AUDIO_FORMAT_STEREO);
-
-    audio_thid = sceKernelCreateThread("audio_thread", audio_thread, 0x10, 0x1000, 0, NULL);
-    if(audio_thid >= 0) sceKernelStartThread(audio_thid, 0, NULL);
+    if(pSndBuffer != NULL) return 0;
 
     iBufSize = BUFFER_SIZE;
-
     pSndBuffer = (short *)malloc(iBufSize * sizeof(short));
     if(pSndBuffer == NULL)
     {
-        return;
+        iBufSize = 0;
+        return -1;
     }
 
     iReadPos = 0;
     iWritePos = 0;
+
+    channel = sceAudioChReserve(PSP_AUDIO_NEXT_CHANNEL, PSP_NUM_AUDIO_SAMPLES, PSP_AUDIO_FORMAT_STEREO);
+    if(channel < 0)
+    {
+        free(pSndBuffer);
+        pSndBuffer = NULL;
+        iBufSize = 0;
+        return -1;
+    }
+
+    audio_thid = sceKernelCreateThread("audio_thread", audio_thread, 0x10, 0x1000, 0, NULL);
+    if(audio_thid < 0)
+    {
+        sceAudioChRelease(channel);
+        channel = -1;
+        free(pSndBuffer);
+        pSndBuffer = NULL;
+        iBufSize = 0;
+        return -1;
+    }
+
+    if(sceKernelStartThread(audio_thid, 0, NULL) < 0)
+    {
+        sceKernelDeleteThread(audio_thid);
+        audio_thid = -1;
+        sceAudioChRelease(channel);
+        channel = -1;
+        free(pSndBuffer);
+        pSndBuffer = NULL;
+        iBufSize = 0;
+        return -1;
+    }
+
+    return 0;
 }
 
 void RemoveSound(void)
 {
-    if(pSndBuffer == NULL) return;
-
     if(audio_thid >= 0)
     {
         sceKernelTerminateDeleteThread(audio_thid);
+        audio_thid = -1;
     }
 
     if(channel >= 0)
     {
         sceAudioChRelease(channel);
+        channel = -1;
     }
 
     free(pSndBuffer);
     pSndBuffer = NULL;
+    iBufSize = 0;
+    iReadPos = 0;
+    iWritePos = 0;
 }
 
 unsigned long SoundGetBytesBuffered(void)
@@ -124,7 +162,7 @@ void SoundFeedStreamData(unsigned char *pSound, long lBytes)
 
     if(pSndBuffer == NULL) return;
 
-    while(lBytes > 0)
+    while(lBytes >= (long)sizeof(short))
     {
         if(((iWritePos + 1) % iBufSize) == iReadPos) break;
 

@@ -19,7 +19,7 @@
 #ifndef __AUDIO_H__
 #define __AUDIO_H__
 
-void SetupSound(void);
+int SetupSound(void);
 void RemoveSound(void);
 unsigned long SoundGetBytesBuffered(void);
 void SoundFeedStreamData(unsigned char *pSound, long lBytes);

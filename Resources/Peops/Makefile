@@ -5,7 +5,7 @@ SPU_OBJS = spu/src/decode_xa.o spu/src/spu.o spu/src/registers.o spu/src/xa.o
 OBJS = main.o exports.o src/psp.o src/audio.o $(SPU_OBJS)
 
 INCDIR = include spu/include
-CFLAGS = -O3 -Os -G0 -Wall -fshort-wchar -fno-pic -mno-check-zero-division
+CFLAGS = -O3 -G0 -Wall -fshort-wchar -fno-pic -mno-check-zero-division
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
 

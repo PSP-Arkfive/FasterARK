@@ -24,7 +24,13 @@
 
 void *malloc(size_t size)
 {
-    SceUID uid = sceKernelAllocPartitionMemory(PSP_MEMORY_PARTITION_USER, "", PSP_SMEM_Low, size + 8, NULL);
+    const size_t header_size = 8 * sizeof(unsigned int);
+    if (size > (size_t)-1 - header_size)
+    {
+        return NULL;
+    }
+
+    SceUID uid = sceKernelAllocPartitionMemory(PSP_MEMORY_PARTITION_USER, "", PSP_SMEM_Low, size + header_size, NULL);
     if(uid >= 0)
     {
         unsigned int *p = (unsigned int *)sceKernelGetBlockHeadAddr(uid);

@@ -26,6 +26,7 @@
 PSP_MODULE_INFO("peops", 0x0007, 1, 0);
 
 STMOD_HANDLER previous;
+static SceUID spu_thread_id = -1;
 
 void (* spuWriteRegister)(int reg, int val, int type);
 void (* cdrTransferSector)(u8 *sector, int mode);
@@ -52,11 +53,24 @@ int spu_thread(SceSize args, void *argp)
 
 void sceMeAudioInitPatched(int (* function)(), void *stack)
 {
-    SPUinit();
-    SPUopen();
+    if(spu_thread_id >= 0) return;
 
-    SceUID thid = sceKernelCreateThread("spu_thread", spu_thread, SPU_PRIORITY_VERY_HIGH, 0x4000, 0, NULL);
-    if(thid >= 0) sceKernelStartThread(thid, 0, NULL);
+    SPUinit();
+    if(SPUopen() < 0) return;
+
+    spu_thread_id = sceKernelCreateThread("spu_thread", spu_thread, SPU_PRIORITY_VERY_HIGH, 0x4000, 0, NULL);
+    if(spu_thread_id < 0)
+    {
+        SPUclose();
+        return;
+    }
+
+    if(sceKernelStartThread(spu_thread_id, 0, NULL) < 0)
+    {
+        sceKernelDeleteThread(spu_thread_id);
+        spu_thread_id = -1;
+        SPUclose();
+    }
 }
 
 /*int (*origAudioInit)() = NULL;
@@ -101,10 +115,6 @@ void cdrTransferSectorPatched(u8 *sector, int mode)
         		{
         			SPUplayADPCMchannel(&cdr_xa);
         			cdr_is_first_sector = 0;
-        		}
-        		else
-        		{
-        			cdr_is_first_sector = -1;
         		}
         	}
         }
@@ -159,7 +169,7 @@ int PeopsOnModuleStart(SceModule * mod){
     }
 
     // Forward to previous Handler
-    if(previous) previous(mod);
+    return previous ? previous(mod) : 0;
 }
 
 int module_start(SceSize args, void *argp)

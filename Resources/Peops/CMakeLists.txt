@@ -12,7 +12,7 @@ target_sources(peops PRIVATE
    spu/src/xa.c
 )
 
-target_compile_options(peops PRIVATE -O3 -Os -G0 -Wall -fshort-wchar -fno-pic -mno-check-zero-division)
+target_compile_options(peops PRIVATE -O3 -G0 -Wall -fshort-wchar -fno-pic -mno-check-zero-division)
 target_include_directories(peops PRIVATE include spu/include ${CFWSDK}/include)
 target_link_directories(peops PRIVATE ${CFWSDK}/libs)
 target_link_libraries(peops PRIVATE

@@ -432,6 +432,7 @@ static void *MAINThread(void *arg)
              predict_nr=(int)*start;start++;
              shift_factor=predict_nr&0xf;
              predict_nr >>= 4;
+             if(predict_nr>=5) predict_nr=0;
              flags=(int)*start;start++;
 
              // -------------------------------------- // 
@@ -641,6 +642,9 @@ void SetupTimer(void)
 
  bEndThread=0;                                         // init thread vars
  bSpuInit=1;                                           // flag: we are inited
+ lastch=-1;
+ lastns=0;
+ iSecureStart=0;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -653,11 +657,13 @@ void RemoveTimer(void)
  bSpuInit=0;
 }
 
+void RemoveStreams(void);
+
 ////////////////////////////////////////////////////////////////////////
 // SETUPSTREAMS: init most of the spu buffers
 ////////////////////////////////////////////////////////////////////////
 
-void SetupStreams(void)
+int SetupStreams(void)
 { 
  int i;
  
@@ -667,18 +673,27 @@ void SetupStreams(void)
  else              i=NSSIZE*2;
 
  sRVBStart = (int *)malloc(i*4);                       // alloc reverb buffer
+
+ XAStart =                                             // alloc xa buffer
+  (uint32_t *)malloc(44100 * sizeof(uint32_t));
+
+ CDDAStart =                                           // alloc cdda buffer
+  (uint32_t *)malloc(16384 * sizeof(uint32_t));
+
+ if(pSpuBuffer == NULL || sRVBStart == NULL || XAStart == NULL || CDDAStart == NULL)
+  {
+   RemoveStreams();
+   return -1;
+  }
+
  memset(sRVBStart,0,i*4);
  sRVBEnd  = sRVBStart + i;
  sRVBPlay = sRVBStart;
 
- XAStart =                                             // alloc xa buffer
-  (uint32_t *)malloc(44100 * sizeof(uint32_t));
  XAEnd   = XAStart + 44100;
  XAPlay  = XAStart;
  XAFeed  = XAStart;
 
- CDDAStart =                                           // alloc cdda buffer
-  (uint32_t *)malloc(16384 * sizeof(uint32_t));
  CDDAEnd   = CDDAStart + 16384;
  CDDAPlay  = CDDAStart;
  CDDAFeed  = CDDAStart;
@@ -690,6 +705,10 @@ void SetupStreams(void)
    s_chan[i].pStart=spuMemC;
    s_chan[i].pCurr=spuMemC;
   }
+
+ XARepeat = 0;
+ XALastVal = 0;
+ return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -706,6 +725,14 @@ void RemoveStreams(void)
  XAStart = NULL;
  free(CDDAStart);                                      // free CDDA buffer
  CDDAStart = NULL;
+ sRVBEnd = NULL;
+ sRVBPlay = NULL;
+ XAEnd = NULL;
+ XAPlay = NULL;
+ XAFeed = NULL;
+ CDDAEnd = NULL;
+ CDDAPlay = NULL;
+ CDDAFeed = NULL;
 }
 
 
@@ -722,9 +749,13 @@ long SPUopen(void)
  
  ReadConfig();                                         // read user stuff
  
- SetupSound();                                         // setup sound (before init!)
+ if(SetupSound()<0) return PSE_SPU_ERR_INIT;
 
- SetupStreams();                                       // prepare streaming
+ if(SetupStreams()<0)
+  {
+   RemoveSound();
+   return PSE_SPU_ERR_INIT;
+  }
 
  SetupTimer();                                         // timer for feeding data
 

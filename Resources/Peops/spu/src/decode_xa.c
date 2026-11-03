@@ -90,6 +90,7 @@ static __inline void ADPCM_DecodeBlock16( ADPCM_Decode_t *decp, u8 filter_range,
 
     blockp = (const unsigned short *)vblockp;
     filterid = (filter_range >>  4) & 0x0f;
+    if (filterid > 3) filterid = 0;
     range    = (filter_range >>  0) & 0x0f;
 
     fy0 = decp->y0;
@@ -100,20 +101,20 @@ static __inline void ADPCM_DecodeBlock16( ADPCM_Decode_t *decp, u8 filter_range,
         s32 x0, x1, x2, x3;
 
         y = *blockp++;
-        x3 = (short)( y        & 0xf000) >> range; x3 <<= SH;
-        x2 = (short)((y <<  4) & 0xf000) >> range; x2 <<= SH;
-        x1 = (short)((y <<  8) & 0xf000) >> range; x1 <<= SH;
-        x0 = (short)((y << 12) & 0xf000) >> range; x0 <<= SH;
+        x3 = ((short)( y        & 0xf000) >> range) * (1 << SH);
+        x2 = ((short)((y <<  4) & 0xf000) >> range) * (1 << SH);
+        x1 = ((short)((y <<  8) & 0xf000) >> range) * (1 << SH);
+        x0 = ((short)((y << 12) & 0xf000) >> range) * (1 << SH);
 
         x0 -= (IK0(filterid) * fy0 + (IK1(filterid) * fy1)) >> SHC; fy1 = fy0; fy0 = x0;
         x1 -= (IK0(filterid) * fy0 + (IK1(filterid) * fy1)) >> SHC; fy1 = fy0; fy0 = x1;
         x2 -= (IK0(filterid) * fy0 + (IK1(filterid) * fy1)) >> SHC; fy1 = fy0; fy0 = x2;
         x3 -= (IK0(filterid) * fy0 + (IK1(filterid) * fy1)) >> SHC; fy1 = fy0; fy0 = x3;
 
-        XACLAMP( x0, -32768<<SH, 32767<<SH ); *destp = x0 >> SH; destp += inc;
-        XACLAMP( x1, -32768<<SH, 32767<<SH ); *destp = x1 >> SH; destp += inc;
-        XACLAMP( x2, -32768<<SH, 32767<<SH ); *destp = x2 >> SH; destp += inc;
-        XACLAMP( x3, -32768<<SH, 32767<<SH ); *destp = x3 >> SH; destp += inc;
+        XACLAMP( x0, -32768*(1<<SH), 32767*(1<<SH) ); *destp = x0 >> SH; destp += inc;
+        XACLAMP( x1, -32768*(1<<SH), 32767*(1<<SH) ); *destp = x1 >> SH; destp += inc;
+        XACLAMP( x2, -32768*(1<<SH), 32767*(1<<SH) ); *destp = x2 >> SH; destp += inc;
+        XACLAMP( x3, -32768*(1<<SH), 32767*(1<<SH) ); *destp = x3 >> SH; destp += inc;
     }
     decp->y0 = fy0;
     decp->y1 = fy1;
@@ -323,8 +324,8 @@ static int parse_xa_audio_sector( xa_decode_t *xdp,
         ADPCM_InitDecode( &xdp->left );
         ADPCM_InitDecode( &xdp->right );
 
-        xdp->nsamples = 18 * 28 * 8;
-        if (xdp->stereo == 1) xdp->nsamples /= 2;
+        xdp->nsamples = 18 * 28 * (xdp->nbits == 4 ? 8 : 4);
+        if (xdp->stereo) xdp->nsamples /= 2;
     }
     xa_decode_data( xdp, sectorp );
 
