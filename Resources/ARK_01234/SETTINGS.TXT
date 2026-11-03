@@ -17,10 +17,3 @@ always, noumd, off
 always, noanalog, off
 always, vitmute, on
 always, qaflags, on
-
-# The following games don't like Inferno Cache
-# Luxor - The Wrath of Set (the other Luxor game works fine)
-ULUS10201, infernocache, off
-# Flat-Out Head On (both US and EU)
-ULUS10328 ULES00968, infernocache, off
-
