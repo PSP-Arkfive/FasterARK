@@ -320,7 +320,9 @@ void backupSaveData() {
     
     displayMsg("BACKUP", "Existing ARK save data\nbacked up to:\nARK_01234_BACKUP");
     sceKernelDelayThread(3000000);
-}void copySaveFiles(int backupMode) {
+}
+
+void copySaveFiles(int backupMode) {
     if (backupMode == 1) {
         if (hasExistingSaveData()) {
             backupSaveData();
@@ -398,35 +400,41 @@ int askReinstallAndBackup(const char* name) {
 }
 
 void installARK4Only(int force) {
+    int choice = 0;
+    bool copy_save = false;
     if (!force && isInstalled("NPUZ01234")) {
-        int choice = askReinstallAndBackup("ARK");
+        choice = askReinstallAndBackup("ARK");
         if (choice == 2) {
             sceKernelExitProcess(0);
         }
-        copySaveFiles(choice);
+        copy_save = true;
     }
     createPspEmuDirectories(0);
+    if (copy_save) copySaveFiles(choice);
     placePspGameData(NULL);
     createBubble(NULL);
 }
 
 void installARKXOnly(int force) {
+    int choice = 0;
+    bool copy_save = false;
     if (!force && isInstalled("SCPS10084")) {
-        int choice = askReinstallAndBackup("ARK-X");
+        choice = askReinstallAndBackup("ARK-X");
         if (choice == 2) {
             sceKernelExitProcess(0);
         }
-        copySaveFiles(choice);
+        copy_save = true;
     }
     createPspEmuDirectories(1);
+    if (copy_save) copySaveFiles(choice);
     placePspGameData("SCPS10084");
     createBubble("SCPS10084");
 }
 
 void doInstall(int backupMode) {
-    copySaveFiles(backupMode);
     installARK4Only(1);
     installARKXOnly(1);
+    copySaveFiles(backupMode);
     checkPlugins();
     taiReloadConfig();
 }
