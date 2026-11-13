@@ -162,7 +162,7 @@
     "WPA2 Support": "WPA2サポート",
     "Use Extra Memory": "追加メモリを使用する",
     "Forced": "強制",
-    "Memory Stick Speedup": "メモリースティックの高速化",
+    "Memory Stick Cache": "メモリースティックのキャッシュ",
     "Old Plugins on ef0": "ef0の旧プラグインのサポート",
     "Prevent hibernation deletion on PSP Go": "一時中断データの削除を防止する(PSPgo)",
     "Skip Sony logos": "ゲームの起動アニメーションをスキップする",
