@@ -6,7 +6,7 @@
 #include <rebootexconfig.h>
 #include <libpspexploit.h>
 
-#include "payload.h"
+#include "rebootex/payload.h"
 
 
 #define BUF_SIZE 16*1024

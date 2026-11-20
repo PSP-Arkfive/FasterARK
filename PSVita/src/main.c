@@ -7,6 +7,7 @@
 #include <psp2/appmgr.h>
 
 #include "install.h"
+#include "timemachine.h"
 #include "ui.h"
 
 int main(int argc, const char *argv[]) {
@@ -20,6 +21,7 @@ int main(int argc, const char *argv[]) {
         "Install ARK Only",
         "Install ARK-X Only",
         "Install Savedata Only",
+        "Install Time Machine",
         "Exit"
     };
     int num_options = sizeof(options) / sizeof(options[0]);
@@ -172,6 +174,20 @@ int main(int argc, const char *argv[]) {
             copySaveFiles(2);
             taiReloadConfig();
             break;
+
+        case 4:
+            displayMsg("Installing Time Machine", "Preparing installation...");
+            if (installTimeMachine() < 0) {
+                sceKernelDelayThread(5000000);
+                return 1;
+            }
+            displayMsg("Time Machine", "Installation complete.");
+            do {
+                sceCtrlPeekBufferPositive(0, &pad, 1);
+                sceKernelDelayThread(10000);
+            } while (pad.buttons & SCE_CTRL_CROSS);
+            waitCross();
+            return 0;
 
         default:
             displayMsg("Exit", "Exiting application...");

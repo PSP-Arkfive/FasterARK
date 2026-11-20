@@ -20,14 +20,6 @@
 #include <colordebugger.h>
 
 
-// Vita Buffered RAM flash0 Filesystem Structure
-typedef struct VitaFlashBufferFile
-{
-    char * name;
-    void * content;
-    unsigned int size;
-} VitaFlashBufferFile;
-
 extern ARKConfig ark_config;
 extern KernelFunctions k_tbl;
 

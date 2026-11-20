@@ -18,7 +18,7 @@
 #include <tinyfont.h>
 #include <colordebugger.h>
 
-#include "payload.h"
+#include "rebootex/payload.h"
 
 
 ARKConfig ark_config = {

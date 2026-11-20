@@ -6,7 +6,7 @@ The `Full` variant (`FasterARK_psp_full.zip`) contains the following extras:
 - `VSH Menu`: a hub for the XMB.
 - `Translations`: for both `XMB` and `CL`.
 - `LEDA Plugin`: allows running `1.50 homebrew` on any firmware and psp or vita model.
-- `ARK-150 Addon`: Only usable on 1K, installs the full 1.50 ARK firmware on memory stick to dual boot with latest firmware (installation and usage: https://github.com/PSP-Arkfive/ARK-150).
+- `Time Machine`: installs 1.50 ARK on PSP-1000 and other supported firmware on Memory Stick (installation and usage: https://github.com/PSP-Arkfive/TimeMachine).
 
 
 
@@ -38,9 +38,10 @@ For new `PS Vita` users:
 - Download `FasterARK_psvita.vpk`
 - `Install` using VitaShell.
 - Run `FasterARK` and choose first option.
+- The `Install Time Machine` option installs the files for ARK-5, Epinephrine, and TN-V2 on the emulated Memory Stick.
 - You can also use `Adrenaline-8` to boot into `ARK-5`. 
 
 
 
 # Building from source
-The top-level `Makefile` downloads the required assets from the latest ARK-5, ARK-150, CustomIPL, Launcher-Menus, PSP dynamic-libraries, and DC10 releases into `tmp/`. Run `make clean` to remove these temporary downloads. Building requires network access, `curl`, and `unzip`.
+The top-level `Makefile` downloads the required assets from the latest ARK-5, Time Machine, CustomIPL, Launcher-Menus, PSP dynamic-libraries, and DC10 releases into `tmp/`. Time Machine supplies the Vita installer assets and the DC and ARK-150 assets used by the updater. Run `make clean` to remove these temporary downloads. Building requires network access, `curl`, and `unzip`.

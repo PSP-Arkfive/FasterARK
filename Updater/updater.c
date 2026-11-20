@@ -34,6 +34,11 @@ char* savedata_files_full[] = {
     "SAVEDATA.BIN",
     "FLASH0.ARK",
     "FLASH150.ARK",
+    "TMCTRL.PRX",
+    "TMREBOOT.PRX",
+    "TMHLPR.PRX",
+    "REBOOT150.PRX",
+    "TMCTRL150.PRX",
     "DC10.ARK",
     "LANG.ARK",
     "LANG150.ARK",
@@ -69,6 +74,11 @@ char* savedata_files_lite[] = {
     "ARKMENU.BIN",
     "UPDATER.TXT",
     "FLASH150.ARK",
+    "TMCTRL.PRX",
+    "TMREBOOT.PRX",
+    "TMHLPR.PRX",
+    "REBOOT150.PRX",
+    "TMCTRL150.PRX",
     "DC10.ARK",
     "IDSREG.PRX",
     "USBDEV.PRX",
@@ -81,6 +91,11 @@ char* cleanup_files[] = {
     "IDSREG.PRX",
     "USBDEV.PRX",
     "FLASH150.ARK",
+    "TMCTRL.PRX",
+    "TMREBOOT.PRX",
+    "TMHLPR.PRX",
+    "REBOOT150.PRX",
+    "TMCTRL150.PRX",
     "LANG150.ARK",
     "DC10.ARK",
     "XMBCTRL.PRX",
@@ -106,6 +121,15 @@ struct {
     char* dest;
 } dc_files[] = {
     {"IOP.PRX", ARK_DC_PATH "/kd/iop.prx"},
+};
+
+static const struct {
+    const char *orig;
+    const char *dest;
+} dc_tm_files[] = {
+    {"TMCTRL.PRX", "ms0:/TM/tmctrl.prx"},
+    {"TMREBOOT.PRX", ARK_DC_PATH "/reboot.prx"},
+    {"TMHLPR.PRX", ARK_DC_PATH "/tmhlpr.prx"},
 };
 
 struct {
@@ -163,8 +187,13 @@ void open_flash(){
 void* read_file(const char* path, int* psize){
     
     SceUID fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
+    if (fd < 0)
+        return NULL;
     int size = sceIoLseek32(fd, 0, SEEK_END);
-    sceIoLseek32(fd, 0, SEEK_SET);
+    if (size <= 0 || sceIoLseek32(fd, 0, SEEK_SET) < 0) {
+        sceIoClose(fd);
+        return NULL;
+    }
     
     void* buf = malloc(size);
     if (!buf){
@@ -184,10 +213,13 @@ void* read_file(const char* path, int* psize){
     return buf;
 }
 
-void write_file(const char* path, void* buf, int size){
+int write_file(const char* path, void* buf, int size){
     SceUID fd = sceIoOpen(path, PSP_O_WRONLY|PSP_O_TRUNC|PSP_O_CREAT, 0777);
-    sceIoWrite(fd, buf, size);
-    sceIoClose(fd);
+    if (fd < 0)
+        return fd;
+    int written = sceIoWrite(fd, buf, size);
+    int result = sceIoClose(fd);
+    return written == size && result >= 0 ? 0 : -1;
 }
 
 void copy_file(char* orig, char* dest){
@@ -324,15 +356,61 @@ void extractArchive(int fdr, char* dest_path, int (*filter)(char*)){
     setInfoMsg(INFO_MSG, "Finished!");
 }
 
-u8 *FindRebootBinBuf(u8 *buf, u8 *header, unsigned int size)
+u8 *FindRebootBinBuf(u8 *buf, const u8 *header, int size, int region_size)
 {
-    for (int i = 0; i < size - REBOOT_HEADER_SIZE; i++)
+    if (!buf || size < region_size)
+        return NULL;
+    for (int i = 0; i <= size - region_size; i++)
     {
-        if (memcmp((void *)&buf[i], (void *)header, REBOOT_HEADER_SIZE) == 0)
+        if (memcmp(&buf[i], header, REBOOT_HEADER_SIZE) == 0)
             return &buf[i];
     }
 
     return 0;
+}
+
+static int filter150Systemctrl(char *name)
+{
+    return strcmp(name, "/kd/ark_systemctrl150.prx") == 0;
+}
+
+static void *read150Systemctrl(SceUID fd, int *size_out)
+{
+    int total = sceIoLseek32(fd, 0, SEEK_END);
+    int count;
+    if (total < 0 || sceIoLseek32(fd, 0, SEEK_SET) != 0 ||
+        sceIoRead(fd, &count, sizeof(count)) != sizeof(count) || count < 0)
+        return NULL;
+
+    for (int i = 0; i < count; i++) {
+        int size;
+        unsigned char length;
+        char name[256];
+        if (sceIoRead(fd, &size, sizeof(size)) != sizeof(size) || size < 0 ||
+            sceIoRead(fd, &length, sizeof(length)) != sizeof(length) ||
+            sceIoRead(fd, name, length) != length)
+            return NULL;
+        name[length] = '\0';
+        int pos = sceIoLseek32(fd, 0, SEEK_CUR);
+        if (pos < 0 || pos > total || size > total - pos)
+            return NULL;
+        if (filter150Systemctrl(name)) {
+            if (size == 0)
+                return NULL;
+            void *data = malloc(size);
+            if (!data)
+                return NULL;
+            if (sceIoRead(fd, data, size) != size) {
+                free(data);
+                return NULL;
+            }
+            *size_out = size;
+            return data;
+        }
+        if (sceIoLseek32(fd, size, SEEK_CUR) < 0)
+            return NULL;
+    }
+    return NULL;
 }
 
 void doLiteInstall(){
@@ -399,6 +477,22 @@ void installDCFiles(){
     extractArchive(fd, ARK_DC_PATH "/", NULL);
     sceIoClose(fd);
 
+    for (int i = 0; i < NELEMS(dc_tm_files); i++) {
+        int size;
+        snprintf(path, sizeof(path), "%s%s", ark_config.arkpath, dc_tm_files[i].orig);
+        void *data = read_file(path, &size);
+        if (!data) {
+            ErrorExit(5000, "Missing Time Machine module %s.", dc_tm_files[i].orig);
+            return;
+        }
+        int result = write_file(dc_tm_files[i].dest, data, size);
+        free(data);
+        if (result < 0) {
+            ErrorExit(5000, "Failed to write %s.", dc_tm_files[i].dest);
+            return;
+        }
+    }
+
     strcpy(path, ark_config.arkpath);
     strcat(path, FLASH0_ARK);
     fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
@@ -441,48 +535,64 @@ void installDC150Files(){
     static const char* systemctrl150_path = ARK_DC_PATH_150 "/kd/ark_systemctrl150.prx"; // reboot150_header & reboot661_header
     
     // backup old files
-    int size_reboot150_old, size_systemctrl150_old;
+    int size_reboot150_old = 0, size_systemctrl150_old = 0;
     void* reboot150_old = read_file(reboot150_path, &size_reboot150_old);
     void* systemctrl150_old = read_file(systemctrl150_path, &size_systemctrl150_old);
+    if (!reboot150_old || !systemctrl150_old) {
+        ErrorExit(5000, "Unable to read existing ARK-150 reboot payloads.");
+        return;
+    }
 
     // extract archive
     char path[ARK_PATH_SIZE];
     strcpy(path, ark_config.arkpath);
     strcat(path, FLASH150_ARK);
     SceUID fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
-    extractArchive(fd, ARK_DC_PATH_150 "/", NULL);
+    if (fd < 0) {
+        ErrorExit(5000, "Missing FLASH150.ARK.");
+        return;
+    }
+    int size_reboot150_new = 0, size_systemctrl150_new = 0, size_tmctrl150_new = 0;
+    void* systemctrl150_new = read150Systemctrl(fd, &size_systemctrl150_new);
+    snprintf(path, sizeof(path), "%sREBOOT150.PRX", ark_config.arkpath);
+    void* reboot150_new = read_file(path, &size_reboot150_new);
+    snprintf(path, sizeof(path), "%sTMCTRL150.PRX", ark_config.arkpath);
+    void* tmctrl150_new = read_file(path, &size_tmctrl150_new);
+    u8 *old150 = FindRebootBinBuf(reboot150_old, reboot150_header, size_reboot150_old, REBOOT150_COMP_SIZE);
+    u8 *new150 = FindRebootBinBuf(reboot150_new, reboot150_header, size_reboot150_new, REBOOT150_COMP_SIZE);
+    u8 *oldctrl150 = FindRebootBinBuf(systemctrl150_old, reboot150_header, size_systemctrl150_old, REBOOT150_COMP_SIZE);
+    u8 *newctrl150 = FindRebootBinBuf(systemctrl150_new, reboot150_header, size_systemctrl150_new, REBOOT150_COMP_SIZE);
+    u8 *oldctrl661 = FindRebootBinBuf(systemctrl150_old, reboot661_header, size_systemctrl150_old, REBOOT661_COMP_SIZE);
+    u8 *newctrl661 = FindRebootBinBuf(systemctrl150_new, reboot661_header, size_systemctrl150_new, REBOOT661_COMP_SIZE);
+    if (!old150 || !new150 || !oldctrl150 || !newctrl150 || !oldctrl661 || !newctrl661 ||
+        !tmctrl150_new || size_tmctrl150_new <= 0) {
+        ErrorExit(5000, "Missing or invalid ARK-150 Time Machine modules.");
+        return;
+    }
+    if (sceIoLseek32(fd, 0, SEEK_SET) != 0) {
+        ErrorExit(5000, "Unable to read FLASH150.ARK.");
+        return;
+    }
+    extractArchive(fd, ARK_DC_PATH_150 "/", filter150Systemctrl);
     sceIoClose(fd);
-
-    int size_reboot150_new, size_systemctrl150_new;
-    void* reboot150_new = read_file(reboot150_path, &size_reboot150_new);
-    void* systemctrl150_new = read_file(systemctrl150_path, &size_systemctrl150_new);
-
-    // copy reboot buffer from old files to new files
-    memcpy(
-        FindRebootBinBuf(reboot150_new, reboot150_header, size_reboot150_new),
-        FindRebootBinBuf(reboot150_old, reboot150_header, size_reboot150_old),
-        REBOOT150_COMP_SIZE
-    );
-    memcpy(
-        FindRebootBinBuf(systemctrl150_new, reboot150_header, size_systemctrl150_new),
-        FindRebootBinBuf(systemctrl150_old, reboot150_header, size_systemctrl150_old),
-        REBOOT150_COMP_SIZE
-    );
-    memcpy(
-        FindRebootBinBuf(systemctrl150_new, reboot661_header, size_systemctrl150_new),
-        FindRebootBinBuf(systemctrl150_old, reboot661_header, size_systemctrl150_old),
-        REBOOT661_COMP_SIZE
-    );
+    memcpy(new150, old150, REBOOT150_COMP_SIZE);
+    memcpy(newctrl150, oldctrl150, REBOOT150_COMP_SIZE);
+    memcpy(newctrl661, oldctrl661, REBOOT661_COMP_SIZE);
 
     // write-back
-    write_file(reboot150_path, reboot150_new, size_reboot150_new);
-    write_file(systemctrl150_path, systemctrl150_new, size_systemctrl150_new);
+    if (write_file(reboot150_path, reboot150_new, size_reboot150_new) < 0 ||
+        write_file(systemctrl150_path, systemctrl150_new, size_systemctrl150_new) < 0 ||
+        write_file(ARK_DC_PATH_150 "/tmctrl150.prx", tmctrl150_new, size_tmctrl150_new) < 0) {
+        ErrorExit(5000, "Failed to write ARK-150 Time Machine modules.");
+        return;
+    }
 
     // free resources
     free(reboot150_old);
     free(reboot150_new);
     free(systemctrl150_old);
     free(systemctrl150_new);
+    free(tmctrl150_new);
 
     // copy language file
     strcpy(path, ark_config.arkpath);

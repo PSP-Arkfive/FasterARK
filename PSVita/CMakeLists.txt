@@ -35,6 +35,7 @@ link_directories(
 add_executable(${PROJECT_NAME}
   src/ui.c
   src/install.c
+  src/timemachine.c
   src/io.c
   src/promote.c
   src/pbp.c
@@ -81,6 +82,8 @@ vita_create_vpk(${PROJECT_NAME}.vpk ${VITA_TITLEID} eboot.bin
   FILE res/psp/PBOOT.PBP psp/PBOOT.PBP
   FILE res/psx/EBOOT.PBP psx/EBOOT.PBP
   FILE res/psx/ARKX.BIN psx/ARKX.BIN
+  FILE res/timemachine/TM.PKG timemachine/TM.PKG
+  FILE res/timemachine/FLASH0.TN timemachine/FLASH0.TN
   FILE res/save/ARK_01234/FLASH0.ARK save/ARK_01234/FLASH0.ARK
   FILE res/save/ARK_01234/ICON0.PNG save/ARK_01234/ICON0.PNG
   FILE res/save/ARK_01234/LANG.ARK save/ARK_01234/LANG.ARK

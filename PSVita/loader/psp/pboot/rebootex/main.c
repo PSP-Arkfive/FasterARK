@@ -1,0 +1,53 @@
+#include <string.h>
+
+#include <cfwmacros.h>
+#include <systemctrl.h>
+#include <systemctrl_se.h>
+#include <bootloadex.h>
+#include <bootloadex_ark.h>
+
+
+int pspemuLfatOpenArkEPSP(BootFile* file)
+{
+    char* p = file->name;
+    if (strcmp(p, "pspbtcnf.bin") == 0){
+        p[2] = 'v'; // custom btcnf for PS Vita
+        RebootexConfigARK* reboot_conf = (RebootexConfigARK*)REBOOTEX_CONFIG;
+        if (reboot_conf->iso_mode >= MODE_OE_LEGACY && reboot_conf->iso_mode <= MODE_ME){
+            reboot_conf->iso_mode = MODE_INFERNO;
+            p[5] = 'i'; // use inferno ISO mode (psvbtinf.bin)
+        }
+        // else use psvbtcnf.bin for np9660
+    }
+    return -1;
+}
+
+BootLoadExConfig bleconf = {
+    .boot_type = TYPE_REBOOTEX,
+    .boot_storage = FLASH_BOOT,
+    .extra_io.vita_io = {
+        .redirect_flash = 1,
+        .pspemuLfatOpenExtra = &pspemuLfatOpenArkEPSP
+    }
+};
+
+
+// Entry Point
+int cfwBoot(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7)
+{
+
+    // initialize ARK reboot config
+    initArkRebootConfig(&bleconf);
+
+    // Configure
+    configureBoot(&bleconf);
+
+    // scan functions
+    findBootFunctions();
+    
+    // patch sceboot
+    patchBootVita();
+    
+    // Forward Call
+    return sceBoot(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+}
